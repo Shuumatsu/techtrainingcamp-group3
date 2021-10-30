@@ -25,7 +25,7 @@ func SnatchHandler(c *gin.Context) {
 	cur_count := 3
 
 	c.JSON(200, gin.H{
-		"coide": 0,
+		"code": 0,
 		"msg":   "success",
 		"data": gin.H{
 			"envelop_id": envelop_id,
