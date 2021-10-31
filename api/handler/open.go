@@ -7,9 +7,9 @@ import (
 
 func OpenHandler(c *gin.Context) {
 	uid, _ := c.GetPostForm("uid")
-	envelop_id, _ := c.GetPostForm("envelop_id")
+	envelope_id, _ := c.GetPostForm("envelope_id")
 
-	log.Printf("envelop %v opened by %v", envelop_id, uid)
+	log.Printf("envelope %v opened by %v", envelope_id, uid)
 
 	value := 50
 

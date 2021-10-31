@@ -11,13 +11,13 @@ func WalletListHandler(c *gin.Context) {
 
 	envelopes := []gin.H{
 		{
-			"envelop_id":  123,
+			"envelope_id":  123,
 			"value":       50,
 			"opened":      true,
 			"snatch_time": 1634551711,
 		},
 		{
-			"envelop_id":  123,
+			"envelope_id":  123,
 			"value":       50,
 			"opened":      false,
 			"snatch_time": 1634551711,
@@ -30,8 +30,8 @@ func WalletListHandler(c *gin.Context) {
 		"code": 0,
 		"msg":  "success",
 		"data": gin.H{
-			"mount":        amount,
-			"envelop_list": envelopes,
+			"amount":        amount,
+			"envelope_list": envelopes,
 		},
 	})
 }
