@@ -3,8 +3,10 @@ local json = require 'json'
 local path = "/get_wallet_list"
 local method = "POST"
 
+math.randomseed(os.time())
+
 request = function()
-    local uid = math.randomseed(os.time())
+    local uid = math.random(2147483648)
 
     local headers = {
         ["Content-Type"] = "application/json",

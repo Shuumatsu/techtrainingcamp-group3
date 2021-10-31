@@ -3,9 +3,11 @@ local json = require 'json'
 local path = "/open"
 local method = "POST"
 
+math.randomseed(os.time())
+
 request = function()
-    local uid = math.randomseed(os.time())
-    local envelope_id = math.randomseed(os.time())
+    local uid = math.random(2147483648)
+    local envelope_id = math.random(2147483648)
 
     local headers = {
         ["Content-Type"] = "application/json",
