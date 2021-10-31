@@ -1,4 +1,4 @@
-module main
+module techtrainingcamp-group3
 
 go 1.13
 
