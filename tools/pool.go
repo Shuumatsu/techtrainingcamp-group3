@@ -7,10 +7,11 @@ import (
 	"reflect"
 	"techtrainingcamp-group3/config"
 	"time"
+
 	"github.com/go-basic/uuid"
 )
 
-const worker_num = 10
+const WorkerNUM = 10
 
 type UnopenedRedEnvelope struct {
 	money int
@@ -28,11 +29,11 @@ func (p *Pool) Work(id int, money int, amount int) {
 	StdDev := math.Min(float64(config.MaxMoney)-mean, mean-float64(config.MinMoney)) / 3
 	restMoney := money
 	for i := 0; i < amount; i++ {
-		rightRange := restMoney-(amount-i-1)*config.MinMoney
+		rightRange := restMoney - (amount-i-1)*config.MinMoney
 		if rightRange > config.MaxMoney {
 			rightRange = config.MaxMoney
 		}
-		now := int(rand.NormFloat64() * StdDev + mean)
+		now := int(rand.NormFloat64()*StdDev + mean)
 		if now > rightRange {
 			now = rightRange
 		}
@@ -50,11 +51,11 @@ func (p *Pool) Snatch() UnopenedRedEnvelope {
 }
 
 func (p *Pool) Start() {
-	for i := 0; i < worker_num; i++ {
-		if i != worker_num - 1 {
-			go p.Work(i, config.TotalMoney / worker_num , config.TotalAmount / worker_num)
+	for i := 0; i < WorkerNUM; i++ {
+		if i != WorkerNUM-1 {
+			go p.Work(i, config.TotalMoney/WorkerNUM, config.TotalAmount/WorkerNUM)
 		} else {
-			go p.Work(i, config.TotalMoney - config.TotalMoney / worker_num * i, config.TotalAmount -  config.TotalAmount / worker_num * i)
+			go p.Work(i, config.TotalMoney-config.TotalMoney/WorkerNUM*i, config.TotalAmount-config.TotalAmount/WorkerNUM*i)
 		}
 	}
 }
@@ -62,7 +63,7 @@ func (p *Pool) Start() {
 func NewPool() Pool {
 	rand.Seed(time.Now().UnixNano())
 	channels := []chan UnopenedRedEnvelope{}
-	for i := 0; i < worker_num; i++ {
+	for i := 0; i < WorkerNUM; i++ {
 		channels = append(channels, make(chan UnopenedRedEnvelope, 2))
 	}
 	set := []reflect.SelectCase{}
