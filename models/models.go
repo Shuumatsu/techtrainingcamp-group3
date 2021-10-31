@@ -1,22 +1,21 @@
 package models
 
 import "time"
-import _ "encoding/json"
 
 type ErrorCode uint64
 
-type SnaptchReq struct {
+type SnatchReq struct {
 	Uid uint64 `json:"uid"`
 }
-type SnaptchData struct {
+type SnatchData struct {
 	EnvelopeId uint64 `json:"envelope_id"`
 	MaxCount   uint64 `json:"max_count"`
 	CurCount   uint64 `json:"cur_count"`
 }
-type SnaptchResp struct {
-	Code ErrorCode   `json:"code"`
-	Msg  string      `json:"msg"`
-	Data SnaptchData `json:"data"`
+type SnatchResp struct {
+	Code ErrorCode  `json:"code"`
+	Msg  string     `json:"msg"`
+	Data SnatchData `json:"data"`
 }
 
 type OpenReq struct {
@@ -33,10 +32,10 @@ type OpenResp struct {
 }
 
 type Envelope struct {
-	EnvelopeId  uint64    `json:"envelope_id"`
-	Value       uint64    `json:"value"`
-	Opened      bool      `json:"opened"`
-	SnaptchTime time.Time `json:"snatch_time"`
+	EnvelopeId uint64    `json:"envelope_id"`
+	Value      uint64    `json:"value"`
+	Opened     bool      `json:"opened"`
+	SnatchTime time.Time `json:"snatch_time"`
 }
 
 type WalletListReq struct {
