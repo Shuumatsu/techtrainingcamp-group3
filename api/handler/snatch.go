@@ -3,14 +3,13 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"techtrainingcamp-group3/models"
 )
 
 func SnatchHandler(c *gin.Context) {
-	uid, ok := c.GetPostForm("uid")
-	if !ok {
-		log.Println("get form error")
-	}
-	log.Printf("snatched by %v", uid)
+	var req models.SnatchReq
+	c.Bind(&req)
+	log.Printf("snatched by %v", req.Uid)
 
 	envelope_id := 123
 	max_count := 5

@@ -3,11 +3,13 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"techtrainingcamp-group3/models"
 )
 
 func WalletListHandler(c *gin.Context) {
-	uid, _ := c.GetPostForm("uid")
-	log.Printf("query %v's wallet", uid)
+	var req models.WalletListReq
+	c.Bind(&req)
+	log.Printf("query %v's wallet", req.Uid)
 
 	envelopes := []gin.H{
 		{

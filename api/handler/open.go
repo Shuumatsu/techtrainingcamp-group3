@@ -3,13 +3,14 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"techtrainingcamp-group3/models"
 )
 
 func OpenHandler(c *gin.Context) {
-	uid, _ := c.GetPostForm("uid")
-	envelope_id, _ := c.GetPostForm("envelope_id")
+	var req models.OpenReq
+	c.Bind(&req)
 
-	log.Printf("envelope %v opened by %v", envelope_id, uid)
+	log.Printf("envelope %v opened by %v", req.EnvelopeId, req.Uid)
 
 	value := 50
 
