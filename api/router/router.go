@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/api/handler"
-	"techtrainingcamp-group3/tools/middlewares"
+	"techtrainingcamp-group3/api/middlewares"
 )
 
 func Register() *gin.Engine {
