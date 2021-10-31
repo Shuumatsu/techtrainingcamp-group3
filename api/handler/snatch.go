@@ -1,15 +1,18 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"log"
+	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SnatchHandler(c *gin.Context) {
 	var req models.SnatchReq
 	c.Bind(&req)
-	log.Printf("snatched by %v", req.Uid)
+
+	logger.Sugar.Debugw("SnatchHandler",
+		"uid", req.Uid)
 
 	envelope_id := 123
 	max_count := 5
@@ -17,11 +20,11 @@ func SnatchHandler(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":   "success",
-		"data": gin.H {
+		"msg":  "success",
+		"data": gin.H{
 			"envelope_id": envelope_id,
-			"max_count":  max_count,
-			"cur_count": cur_count,
+			"max_count":   max_count,
+			"cur_count":   cur_count,
 		},
 	})
 }

@@ -1,25 +1,28 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"log"
+	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func WalletListHandler(c *gin.Context) {
 	var req models.WalletListReq
 	c.Bind(&req)
-	log.Printf("query %v's wallet", req.Uid)
+
+	logger.Sugar.Debugw("WalletListHandler",
+		"uid", req.Uid)
 
 	envelopes := []gin.H{
 		{
-			"envelope_id":  123,
+			"envelope_id": 123,
 			"value":       50,
 			"opened":      true,
 			"snatch_time": 1634551711,
 		},
 		{
-			"envelope_id":  123,
+			"envelope_id": 123,
 			"value":       50,
 			"opened":      false,
 			"snatch_time": 1634551711,
