@@ -6,20 +6,23 @@ import (
 )
 
 func SnatchHandler(c *gin.Context) {
-	uid, _ := c.GetPostForm("uid")
+	uid, ok := c.GetPostForm("uid")
+	if !ok {
+		log.Println("get form error")
+	}
 	log.Printf("snatched by %v", uid)
 
-	envelop_id := 123
+	envelope_id := 123
 	max_count := 5
 	cur_count := 3
 
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":   "success",
-		"data": gin.H{
-			"envelop_id": envelop_id,
+		"data": gin.H {
+			"envelope_id": envelope_id,
 			"max_count":  max_count,
-			"curr_count": cur_count,
+			"cur_count": cur_count,
 		},
 	})
 }
