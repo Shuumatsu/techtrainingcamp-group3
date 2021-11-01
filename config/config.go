@@ -37,6 +37,6 @@ func init() {
 
 		GinMode: os.Getenv("GIN_MODE"),
 
-		LogLevel: os.Getenv("DEBUG_LEVEL"),
+		LogLevel: os.Getenv("LOG_LEVEL"),
 	}
 }
