@@ -3,6 +3,8 @@ package db
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"techtrainingcamp-group3/config"
 
 	"gorm.io/driver/mysql"
@@ -29,4 +31,19 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 	DB = db
+}
+
+func ParseEnvelopeList(envelopeList string) ([]uint64, error) {
+	envelopesID := make([]uint64, 0)
+	for _, token := range strings.Split(envelopeList, ",") {
+		if len(token) == 0 {
+			continue
+		}
+		eid, err := strconv.Atoi(token)
+		if err != nil {
+			return nil, err
+		}
+		envelopesID = append(envelopesID, uint64(eid))
+	}
+	return envelopesID, nil
 }

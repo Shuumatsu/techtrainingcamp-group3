@@ -33,8 +33,8 @@ type OpenResp struct {
 
 type Envelope struct {
 	EnvelopeId uint64    `json:"envelope_id"`
-	Value      uint64    `json:"value"`
 	Opened     bool      `json:"opened"`
+	Value      uint64    `json:"value"`
 	SnatchTime time.Time `json:"snatch_time"`
 }
 
