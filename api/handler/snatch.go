@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"math/rand"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/tools"
 	"github.com/gin-gonic/gin"
@@ -14,17 +15,24 @@ func SnatchHandler(c *gin.Context) {
 	}
 	log.Printf("snatched by %v", uid)
 	// TODO: Query the amount of snatching for this user
-	envelope := tools.REPool.Snatch()
-	max_count := config.MaxSnatchAmount
-	cur_count := 3
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":   "success",
-		"data": gin.H {
-			"envelope_id": envelope.Eid,
-			"max_count":  max_count,
-			"cur_count": cur_count,
-		},
-	})
+	if rand.Float32() > config.SnatchProb {
+		c.JSON(200, gin.H{
+			"code": 1,
+			"msg":  "fail",
+		})
+	} else {
+		envelope := tools.REPool.Snatch()
+		max_count := config.MaxSnatchAmount
+		cur_count := 3
+		c.JSON(200, gin.H{
+			"code": 0,
+			"msg":  "success",
+			"data": gin.H{
+				"envelope_id": envelope.Eid,
+				"max_count":   max_count,
+				"cur_count":   cur_count,
+			},
+		})
+	}
 }

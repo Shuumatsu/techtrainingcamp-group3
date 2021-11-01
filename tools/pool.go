@@ -1,19 +1,17 @@
 package tools
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"reflect"
 	"techtrainingcamp-group3/config"
 	"time"
-
-	"github.com/go-basic/uuid"
+	"github.com/godruoyi/go-snowflake"
 )
 
 type UnopenedRedEnvelope struct {
 	Money int
-	Eid   string
+	Eid   uint64
 }
 
 type Pool struct {
@@ -24,7 +22,7 @@ type Pool struct {
 var REPool Pool
 
 func (p *Pool) Work(id int, money int, amount int) {
-	fmt.Printf("Worker %d, money %d, amount %d\n", id, money, amount)
+	snowflake.SetMachineID(uint16(id))
 	mean := float64(money) / float64(amount)
 	StdDev := math.Min(float64(config.MaxMoney)-mean, mean-float64(config.MinMoney)) / 3
 	restMoney := money
@@ -41,7 +39,8 @@ func (p *Pool) Work(id int, money int, amount int) {
 			now = config.MinMoney
 		}
 		restMoney -= now
-		p.lanes[id] <- UnopenedRedEnvelope{now, uuid.New()}
+		eid := snowflake.ID()
+		p.lanes[id] <- UnopenedRedEnvelope{now, eid}
 	}
 }
 
