@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"techtrainingcamp-group3/config"
 
 	"gorm.io/driver/mysql"
@@ -26,7 +25,7 @@ func init() {
 		config.Env.DBName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err)
 	}
 	DB = db
 }
