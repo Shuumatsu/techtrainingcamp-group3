@@ -50,7 +50,7 @@ func WalletListHandler(c *gin.Context) {
 	amount := 50
 
 	c.JSON(200, gin.H{
-		"code": 0,
+		"code": SUCCESS,
 		"msg":  "success",
 		"data": gin.H{
 			"amount":        amount,
