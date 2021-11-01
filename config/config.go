@@ -1,8 +1,12 @@
 package config
 
 const (
-	TotalMoney  int = 20000
-	MaxMoney    int = 500
-	MinMoney    int = 100
-	TotalAmount int = 100
+	TotalMoney      = 20000
+	MaxMoney        = 500
+	MinMoney        = 100
+	TotalAmount     = 100
+	SnatchProb      = 0.6
+	PoolCapacity    = 128
+	PoolWorkerNUM   = 10
+	MaxSnatchAmount = 5
 )

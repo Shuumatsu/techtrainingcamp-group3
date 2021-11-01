@@ -1,8 +1,10 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
+	"techtrainingcamp-group3/config"
+	"techtrainingcamp-group3/tools"
+	"github.com/gin-gonic/gin"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -11,16 +13,16 @@ func SnatchHandler(c *gin.Context) {
 		log.Println("get form error")
 	}
 	log.Printf("snatched by %v", uid)
-
-	envelope_id := 123
-	max_count := 5
+	// TODO: Query the amount of snatching for this user
+	envelope := tools.REPool.Snatch()
+	max_count := config.MaxSnatchAmount
 	cur_count := 3
 
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":   "success",
 		"data": gin.H {
-			"envelope_id": envelope_id,
+			"envelope_id": envelope.Eid,
 			"max_count":  max_count,
 			"cur_count": cur_count,
 		},

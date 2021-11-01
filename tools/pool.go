@@ -11,17 +11,17 @@ import (
 	"github.com/go-basic/uuid"
 )
 
-const WorkerNUM = 10
-
 type UnopenedRedEnvelope struct {
-	money int
-	eid   string
+	Money int
+	Eid   string
 }
 
 type Pool struct {
 	lanes []chan UnopenedRedEnvelope
 	set   []reflect.SelectCase
 }
+
+var REPool Pool
 
 func (p *Pool) Work(id int, money int, amount int) {
 	fmt.Printf("Worker %d, money %d, amount %d\n", id, money, amount)
@@ -51,11 +51,11 @@ func (p *Pool) Snatch() UnopenedRedEnvelope {
 }
 
 func (p *Pool) Start() {
-	for i := 0; i < WorkerNUM; i++ {
-		if i != WorkerNUM-1 {
-			go p.Work(i, config.TotalMoney/WorkerNUM, config.TotalAmount/WorkerNUM)
+	for i := 0; i < config.PoolWorkerNUM; i++ {
+		if i != config.PoolWorkerNUM-1 {
+			go p.Work(i, config.TotalMoney/config.PoolWorkerNUM, config.TotalAmount/config.PoolWorkerNUM)
 		} else {
-			go p.Work(i, config.TotalMoney-config.TotalMoney/WorkerNUM*i, config.TotalAmount-config.TotalAmount/WorkerNUM*i)
+			go p.Work(i, config.TotalMoney-config.TotalMoney/config.PoolWorkerNUM*i, config.TotalAmount-config.TotalAmount/config.PoolWorkerNUM*i)
 		}
 	}
 }
@@ -63,8 +63,8 @@ func (p *Pool) Start() {
 func NewPool() Pool {
 	rand.Seed(time.Now().UnixNano())
 	channels := []chan UnopenedRedEnvelope{}
-	for i := 0; i < WorkerNUM; i++ {
-		channels = append(channels, make(chan UnopenedRedEnvelope, 2))
+	for i := 0; i < config.PoolWorkerNUM; i++ {
+		channels = append(channels, make(chan UnopenedRedEnvelope, config.PoolCapacity))
 	}
 	set := []reflect.SelectCase{}
 	for _, ch := range channels {
@@ -74,4 +74,9 @@ func NewPool() Pool {
 		})
 	}
 	return Pool{channels, set}
+}
+
+func PoolInit() {
+	REPool = NewPool()
+	REPool.Start()
 }

@@ -16,8 +16,8 @@ func TestPool(t *testing.T) {
 	sum := 0
 	for i := 0; i < config.TotalAmount; i++ {
 		re := p.Snatch()
-		fmt.Printf("Get red envelope %s, it is %d yuan\n", re.eid, re.money)
-		sum += re.money
+		fmt.Printf("Get red envelope %s, it is %d yuan\n", re.Eid, re.Money)
+		sum += re.Money
 	}
 	fmt.Printf("Total money %d\n", sum)
 }
