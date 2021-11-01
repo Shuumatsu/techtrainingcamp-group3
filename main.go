@@ -8,6 +8,8 @@ import (
 	"techtrainingcamp-group3/logger"
 	"time"
 
+	_ "techtrainingcamp-group3/db"
+
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 )
