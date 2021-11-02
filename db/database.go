@@ -40,7 +40,7 @@ func ParseEnvelopeList(envelopeList string) ([]uint64, error) {
 		}
 		eid, err := strconv.Atoi(token)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invaild: the envelope id can not change to number")
 		}
 		envelopesID = append(envelopesID, uint64(eid))
 	}

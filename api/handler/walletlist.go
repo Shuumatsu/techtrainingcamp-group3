@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/db"
 	"techtrainingcamp-group3/logger"
@@ -21,17 +22,6 @@ func (WalletListUser) TableName() string {
 	return "user"
 }
 
-type WalletListEnvelope struct {
-	EnvelopeId uint64 `gorm:"envelope_id" json:"envelope_id"`
-	Opened     bool   `gorm:"opened" json:"opened"`
-	Value      uint64 `gorm:"value" json:"value,omitempty"`
-	SnatchTime uint64 `gorm:"snatch_time" json:"snatch_time"`
-}
-
-func (WalletListEnvelope) TableName() string {
-	return "envelope"
-}
-
 func WalletListHandler(c *gin.Context) {
 	var req models.WalletListReq
 	c.Bind(&req)
@@ -44,35 +34,41 @@ func WalletListHandler(c *gin.Context) {
 			"code": FAIL,
 			"msg":  "fail",
 		})
+		logger.Sugar.Debugw("WalletListHandler",
+			"get Envelopes error", err)
 		return
 	}
-
-	amount := 50
-
-	c.JSON(200, gin.H{
-		"code": SUCCESS,
-		"msg":  "success",
-		"data": gin.H{
-			"amount":        amount,
-			"envelope_list": envelopes,
+	c.JSON(200, models.WalletListResp{
+		Code: SUCCESS,
+		Msg:  "success",
+		Data: models.WalletListData{
+			Amount:       50,
+			EnvelopeList: envelopes,
 		},
 	})
 }
 
-func GetAllEnvelopesByUID(uid uint64) ([]*WalletListEnvelope, error) {
+func GetAllEnvelopesByUID(uid uint64) ([]models.Envelope, error) {
 	var user WalletListUser
+	// 尝试根据uid从user表中获取envelope_list
 	if err := db.DB.Table(WalletListUser{}.TableName()).First(
 		&user, uid).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("uid not found")
 	}
+	// 解析envelope_list
 	envelopesID, err := db.ParseEnvelopeList(user.EnvelopeList)
 	if err != nil {
 		return nil, err
 	}
+	//  没有envelope
+	if len(envelopesID) == 0 {
+		return nil, nil
+	}
 	logger.Sugar.Debugw("debug",
 		"evlpsID", envelopesID)
-	var envelopes []*WalletListEnvelope
-	if err = db.DB.Table(WalletListEnvelope{}.TableName()).Where(
+	// 尝试根据envelope_id从envelope表中获取envelop具体数据
+	var envelopes []models.Envelope
+	if err = db.DB.Table(models.Envelope{}.TableName()).Where(
 		envelopesID).Find(&envelopes).Error; err != nil {
 		return nil, err
 	}
