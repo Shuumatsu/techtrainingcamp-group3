@@ -2,7 +2,7 @@ version: '3'
 
 services:
   database:
-    image: mysql:8.0.27
+    build: ./db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123456
