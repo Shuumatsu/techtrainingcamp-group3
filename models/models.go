@@ -32,10 +32,10 @@ type OpenResp struct {
 }
 
 type Envelope struct {
-	EnvelopeId uint64    `json:"envelope_id"`
-	Value      uint64    `json:"value"`
-	Opened     bool      `json:"opened"`
-	SnatchTime time.Time `json:"snatch_time"`
+	EnvelopeId uint64    `json:"envelope_id" gorm:"envelope_id"`
+	Opened     bool      `json:"opened" gorm:"opened"`
+	Value      uint64    `json:"value,omitempty" gorm:"value"`
+	SnatchTime time.Time `json:"snatch_time" gorm:"snatch_time"`
 }
 
 type WalletListReq struct {
@@ -49,4 +49,8 @@ type WalletListResp struct {
 	Code ErrorCode      `json:"code"`
 	Msg  string         `json:"msg"`
 	Data WalletListData `json:"data"`
+}
+
+func (Envelope) TableName() string {
+	return "envelope"
 }

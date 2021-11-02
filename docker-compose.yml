@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  database:
+    build: ./db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: bytedance_envelope
+      MYSQL_USER: group3
+      MYSQL_PASSWORD: 123456
+  main:
+    build: .
+    ports:
+      - '8080:8080' # 监听8080端口，并暴露到宿主机的8080端口
+    depends_on:
+      - database
+    restart: always
+    environment:
+      DB_HOST: database

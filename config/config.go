@@ -13,10 +13,15 @@ type Config struct {
 }
 
 type Environment struct {
-	DBHost string
-	DBPort string
+	// database config
+	DBUser   string
+	DBPasswd string
+	DBHost   string
+	DBPort   string
+	DBName   string
 
 	GinMode  string
+
 	LogLevel string
 }
 
@@ -32,11 +37,14 @@ func init() {
 		panic(err)
 	}
 	Env = &Environment{
-		DBHost: os.Getenv("DB_HOST"),
-		DBPort: os.Getenv("DB_PORT"),
+		DBUser:   os.Getenv("DB_USER"),
+		DBPasswd: os.Getenv("DB_PASSWD"),
+		DBHost:   os.Getenv("DB_HOST"),
+		DBPort:   os.Getenv("DB_PORT"),
+		DBName:   os.Getenv("DB_NAME"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 
-		LogLevel: os.Getenv("DEBUG_LEVEL"),
+		LogLevel: os.Getenv("LOG_LEVEL"),
 	}
 }
