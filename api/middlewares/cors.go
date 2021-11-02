@@ -2,14 +2,11 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Println("form:", c.Request.Form)
-		log.Println("postform:", c.Request.PostForm)
 		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")
 		if origin != "" {

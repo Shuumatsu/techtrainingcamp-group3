@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"os"
+	"github.com/joho/godotenv"
+	"github.com/philandstuff/dhall-golang/v6"
+)
 
 const (
 	TotalMoney      = 20000
@@ -12,6 +16,11 @@ const (
 	PoolWorkerNUM   = 10
 	MaxSnatchAmount = 5
 )
+
+type Config struct {
+	ZapLogFile string `dhall:"zap_log_file"`
+	GinLogFile string `dhall:"gin_log_file"`
+}
 
 type Environment struct {
 	// database config
@@ -26,9 +35,17 @@ type Environment struct {
 	LogLevel string
 }
 
+var Conf *Config
 var Env *Environment
 
 func init() {
+	if err := dhall.UnmarshalFile("config.dhall", &Conf); err != nil {
+		panic(err)
+	}
+
+	if err := godotenv.Load(); err != nil {
+		panic(err)
+	}
 	Env = &Environment{
 		DBUser:   os.Getenv("DB_USER"),
 		DBPasswd: os.Getenv("DB_PASSWD"),

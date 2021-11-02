@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"techtrainingcamp-group3/logger"
+	"techtrainingcamp-group3/models"
+
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"strconv"
