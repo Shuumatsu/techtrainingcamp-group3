@@ -2,6 +2,7 @@ package logger
 
 import (
 	"os"
+	"path/filepath"
 	"techtrainingcamp-group3/config"
 
 	"go.uber.org/zap"
@@ -12,6 +13,14 @@ var Logger *zap.Logger
 var Sugar *zap.SugaredLogger
 
 func init() {
+
+	if _,err := os.Stat(filepath.Dir(config.Conf.ZapLogFile));os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Dir(config.Conf.ZapLogFile), 0666)
+		if err != nil{
+			panic(err)
+		}
+	}
+
 	var stdoutWriteSyncer zapcore.WriteSyncer
 	if config.Env.LogLevel == "release" {
 		file, err := os.Create(config.Conf.ZapLogFile)
