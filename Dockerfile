@@ -26,7 +26,8 @@ RUN go env -w GOPATH="/go/gopath" \
 # 安装mysql
 RUN apt-get install -y mysql-server mysql-client
 # 启动mysql服务
-RUN service mysql start \
+RUN usermod -d /var/lib/mysql/ mysql \
+&& service mysql start \
 # 创建mysql用户
 && echo "create user 'group3'@'localhost' identified by '123456';grant all privileges on *.* to 'group3'@'localhost' with grant option;" > /tmp/createuser.sql \
 && mysql -u root < /tmp/createuser.sql \
@@ -39,7 +40,9 @@ RUN cd /workspace && go mod tidy && go mod vendor
 
 # 启动mysql服务
 ENTRYPOINT ["service", "mysql", "start"]
+
 # 运行项目
-CMD cd /workspace;go run main.go
-# 暴露8080端口
+CMD cd /workspace; go run main.go
+
+# 声明：该项目使用8080端口
 EXPOSE 8080
