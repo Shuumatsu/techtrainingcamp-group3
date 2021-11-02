@@ -15,6 +15,7 @@ const (
 	Success openCode = iota //success
 	Opened         // Already opened
 	NoExist        // The specified user_id and envelope_id doesn't exist
+	NoUser         // The specified user doesn't exist in user table
 	UnknownFailure //UnknownFailure
 )
 
@@ -26,6 +27,8 @@ func(c openCode)String() string {
 		return "opened"
 	case NoExist:
 		return "noExist"
+	case NoUser:
+		return "noUser"
 	case UnknownFailure:
 		return "unknownFailure"
 	}
@@ -45,7 +48,7 @@ func OpenHandler(c *gin.Context) {
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 
-
+	//get envelope by envelope_id and user_id
 	envelopeP := db.GetEnvelope(req.EnvelopeId,req.Uid)
 	if envelopeP == nil{
 		c.JSON(200, gin.H{
@@ -58,20 +61,35 @@ func OpenHandler(c *gin.Context) {
 		return
 	}
 
-	if envelopeP.Open_stat == true{
+	//get user by user_id
+	userP := db.GetUser(req.Uid)
+	if userP == nil{
 		c.JSON(200, gin.H{
-			"code": Opened,
-			"msg":  Opened.String(),
+			"code": NoUser,
+			"msg":  NoUser.String(),
 			"data": gin.H{
-				"value": envelopeP.Value,
+				"value": 0,
 			},
 		})
 		return
 	}
 
-	if err = db.UpdateEnvelopeOpen(envelopeP);err != nil{
+	//The envelope has already been opened
+	if envelopeP.Open_stat == true{
+		c.JSON(200, gin.H{
+			"code": Opened,
+			"msg":  Opened.String(),
+			"data": gin.H{
+				"value": 0,
+			},
+		})
+		return
+	}
+
+	//Update envelope status and user amount
+	if err = db.UpdateEnvelopeOpen(envelopeP,userP);err != nil{
 		logger.Sugar.Errorw("OpenHandler update error")
-		c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
+		c.JSON(http.StatusServiceUnavailable,gin.H{"error":err.Error()})
 		return
 	}
 
