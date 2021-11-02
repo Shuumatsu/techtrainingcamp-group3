@@ -10,7 +10,7 @@ import (
 )
 
 type UnopenedRedEnvelope struct {
-	Money int
+	Money uint64
 	Eid   uint64
 }
 
@@ -40,7 +40,7 @@ func (p *Pool) Work(id int, money int, amount int) {
 		}
 		restMoney -= now
 		eid := snowflake.ID()
-		p.lanes[id] <- UnopenedRedEnvelope{now, eid}
+		p.lanes[id] <- UnopenedRedEnvelope{uint64(now), eid}
 	}
 }
 
