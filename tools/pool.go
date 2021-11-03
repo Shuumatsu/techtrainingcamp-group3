@@ -10,7 +10,7 @@ import (
 )
 
 type UnopenedRedEnvelope struct {
-	Money uint64
+	Money int
 	Eid   uint64
 }
 
@@ -40,7 +40,7 @@ func (p *Pool) Work(id int, money int, amount int) {
 		}
 		restMoney -= now
 		eid := snowflake.ID()
-		p.lanes[id] <- UnopenedRedEnvelope{uint64(now), eid}
+		p.lanes[id] <- UnopenedRedEnvelope{now, eid}
 	}
 }
 
@@ -75,7 +75,7 @@ func NewPool() Pool {
 	return Pool{channels, set}
 }
 
-func PoolInit() {
+func init() {
 	REPool = NewPool()
 	REPool.Start()
 }

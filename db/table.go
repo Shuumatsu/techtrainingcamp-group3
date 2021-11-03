@@ -1,5 +1,19 @@
 package db
 
+import "time"
+
+type Envelope struct {
+	Envelope_id   uint64    `gorm:"envelope_id;primaryKey"`
+	Uid           uint64    `gorm:"uid"`
+	Open_stat     bool      `gorm:"open_stat"`
+	Value         int       `gorm:"value"`
+	Snatched_time time.Time `gorm:"snatched_time"`
+}
+
+func (Envelope) TableName() string {
+	return "envelope"
+}
+
 type User struct {
 	Uid          uint64 `gorm:"uid"`
 	EnvelopeList string `gorm:"envelope_list"`
@@ -8,15 +22,4 @@ type User struct {
 
 func (User) TableName() string {
 	return "user"
-}
-
-type Envelope struct {
-	EnvelopeId uint64 `gorm:"envelope_id" json:"envelope_id"`
-	Opened     bool   `gorm:"opened" json:"opened"`
-	Value      uint64 `gorm:"value" json:"value,omitempty"`
-	SnatchTime uint64 `gorm:"snatch_time" json:"snatch_time"`
-}
-
-func (Envelope) TableName() string {
-	return "envelope"
 }

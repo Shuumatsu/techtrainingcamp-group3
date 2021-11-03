@@ -1,24 +1,24 @@
 package handler
 
 import (
-	"techtrainingcamp-group3/logger"
-	"techtrainingcamp-group3/models"
-
-	"github.com/gin-gonic/gin"
 	"math/rand"
-	"strconv"
+	"net/http"
 	"strings"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/db"
+	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
-	"techtrainingcamp-group3/tools"
-	"time"
+	"github.com/gin-gonic/gin"
 )
 
 func SnatchHandler(c *gin.Context) {
 	var req models.SnatchReq
-	c.Bind(&req)
-
+	err := c.Bind(&req)
+	if err != nil {
+		logger.Sugar.Errorw("SnatchHandler parameter bind error")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if rand.Float32() > config.SnatchProb {
 		c.JSON(200, gin.H{
 			"code": 1,
@@ -38,23 +38,23 @@ func SnatchHandler(c *gin.Context) {
 				"msg":  "too many envelopes",
 			})
 		} else {
-			envelope := tools.REPool.Snatch()
-			eid := strconv.FormatUint(envelope.Eid, 10)
-			if cur_count == 0 {
-				db.DB.Table(db.User{}.TableName()).Create(db.User{Uid: req.Uid, EnvelopeList: eid, Amount: 0})
+			if eid, err := db.UpdateUsersEnvelope(user, cur_count); err != nil {
+				c.JSON(200, gin.H{
+					"code": 3,
+					"msg":  "database error",
+				})
 			} else {
-				db.DB.Table(db.User{}.TableName()).Where("uid", req.Uid).Update("envelope_list", user.EnvelopeList+","+eid)
+				c.JSON(200, gin.H{
+					"code": 0,
+					"msg":  "success",
+					"data": gin.H{
+						"envelope_id": eid,
+						"max_count":   max_count,
+						"cur_count":   cur_count + 1,
+					},
+				})
 			}
-			db.DB.Table(db.Envelope{}.TableName()).Create(db.Envelope{EnvelopeId: envelope.Eid, Opened: false, Value: envelope.Money, SnatchTime: uint64(time.Now().UTC().UnixNano())})
-			c.JSON(200, gin.H{
-				"code": 0,
-				"msg":  "success",
-				"data": gin.H{
-					"envelope_id": envelope.Eid,
-					"max_count":   max_count,
-					"cur_count":   cur_count + 1,
-				},
-			})
 		}
 	}
 }
+
