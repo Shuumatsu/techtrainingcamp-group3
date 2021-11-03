@@ -2,8 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"techtrainingcamp-group3/db/mongo"
-	"techtrainingcamp-group3/db/redis"
+	"github.com/go-redis/redis"
+	"techtrainingcamp-group3/db/mg"
+	rd "techtrainingcamp-group3/db/rds"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 )
@@ -48,12 +49,17 @@ func WalletListHandler(c *gin.Context) {
 }
 
 func GetUserByUID(uid models.UID) (*models.User, error) {
-	var user *models.User
+	var user models.User
 	// 查询redis缓存
-	if err := redis.RD.Get(uid.String()).Scan(user); err == nil {
-		logger.Sugar.Debugw("getWalletList: get in redis cache")
-		return user, nil
+	err := rd.RD.Get(uid.String()).Scan(&user)
+	if err != nil && err != redis.Nil {
+		// redis error
+		logger.Sugar.Debugw("redis", "error", err)
+	}
+	if err != redis.Nil {
+		// 命中缓存
+		return &user, nil
 	}
 	// 查询mongodb
-	return mongo.FindUserByUID(uid)
+	return mg.FindUserByUID(uid)
 }
