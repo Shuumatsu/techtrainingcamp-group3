@@ -6,6 +6,7 @@ import (
 	"techtrainingcamp-group3/api/router"
 	"techtrainingcamp-group3/config"
 	_ "techtrainingcamp-group3/db"
+	_ "techtrainingcamp-group3/db/redis"
 	"techtrainingcamp-group3/logger"
 
 	"github.com/gin-gonic/gin"

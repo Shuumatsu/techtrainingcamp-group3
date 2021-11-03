@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  database:
+  mysql:
     build: ./db
     restart: always
     environment:
@@ -9,12 +9,17 @@ services:
       MYSQL_DATABASE: bytedance_envelope
       MYSQL_USER: group3
       MYSQL_PASSWORD: 123456
+  redis:
+    image: redis:6.2.6
+    restart: always
   main:
     build: .
     ports:
       - '8080:8080' # 监听8080端口，并暴露到宿主机的8080端口
     depends_on:
-      - database
+      - mysql
+      - redis
     restart: always
     environment:
-      DB_HOST: database
+      DB_HOST: mysql
+      REDIS_HOST: redis

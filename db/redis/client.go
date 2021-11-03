@@ -16,8 +16,8 @@ func init() {
 	rd := redis.NewClient(&option)
 	if pingResult, err := rd.Ping().Result(); err != nil {
 		logger.Sugar.Errorw("redis init error",
-			"redis config:", rd,
-			"ping redis result:", pingResult,
+			"redis config", rd,
+			"ping redis result", pingResult,
 			"error msg", err.Error())
 		panic(err)
 	}

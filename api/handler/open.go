@@ -12,14 +12,14 @@ import (
 type openCode int
 
 const (
-	Success openCode = iota //success
-	Opened         // Already opened
-	NoExist        // The specified user_id and envelope_id doesn't exist
-	NoUser         // The specified user doesn't exist in user table
-	UnknownFailure //UnknownFailure
+	Success        openCode = iota //success
+	Opened                         // Already opened
+	NoExist                        // The specified user_id and envelope_id doesn't exist
+	NoUser                         // The specified user doesn't exist in user table
+	UnknownFailure                 //UnknownFailure
 )
 
-func(c openCode)String() string {
+func (c openCode) String() string {
 	switch c {
 	case Success:
 		return "success"
@@ -35,22 +35,20 @@ func(c openCode)String() string {
 	return "N/A"
 }
 
-
-
 func OpenHandler(c *gin.Context) {
 	var req models.OpenReq
 	err := c.Bind(&req)
-	if err != nil{
+	if err != nil {
 		logger.Sugar.Errorw("OpenHandler parameter bind error")
-		c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 
 	//get envelope by envelope_id and user_id
-	envelopeP := db.GetEnvelope(req.EnvelopeId,req.Uid)
-	if envelopeP == nil{
+	envelopeP := db.GetEnvelope(req.EnvelopeId, req.Uid)
+	if envelopeP == nil {
 		c.JSON(200, gin.H{
 			"code": NoExist,
 			"msg":  NoExist.String(),
@@ -63,7 +61,7 @@ func OpenHandler(c *gin.Context) {
 
 	//get user by user_id
 	userP := db.GetUser(req.Uid)
-	if userP == nil{
+	if userP == nil {
 		c.JSON(200, gin.H{
 			"code": NoUser,
 			"msg":  NoUser.String(),
@@ -75,7 +73,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//The envelope has already been opened
-	if envelopeP.Open_stat == true{
+	if envelopeP.Open_stat == true {
 		c.JSON(200, gin.H{
 			"code": Opened,
 			"msg":  Opened.String(),
@@ -87,9 +85,9 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//Update envelope status and user amount
-	if err = db.UpdateEnvelopeOpen(envelopeP,userP);err != nil{
+	if err = db.UpdateEnvelopeOpen(envelopeP, userP); err != nil {
 		logger.Sugar.Errorw("OpenHandler update error")
-		c.JSON(http.StatusServiceUnavailable,gin.H{"error":err.Error()})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -101,7 +99,4 @@ func OpenHandler(c *gin.Context) {
 		},
 	})
 
-
 }
-
-
