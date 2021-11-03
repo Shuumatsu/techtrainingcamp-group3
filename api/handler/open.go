@@ -47,7 +47,7 @@ func OpenHandler(c *gin.Context) {
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 
 	//get envelope by envelope_id and user_id
-	envelopeP := db.GetEnvelope(req.EnvelopeId, req.Uid)
+	envelopeP := db.GetEnvelope(req.EnvelopeId, uint64(req.Uid))
 	if envelopeP == nil {
 		c.JSON(200, gin.H{
 			"code": NoExist,
@@ -60,7 +60,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//get user by user_id
-	userP := db.GetUser(req.Uid)
+	userP := db.GetUser(uint64(req.Uid))
 	if userP == nil {
 		c.JSON(200, gin.H{
 			"code": NoUser,

@@ -2,9 +2,11 @@ package mongo
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func FindUserByEID(eid models.EID) (*models.User, error) {
@@ -45,4 +47,21 @@ func AddEnvelopeToUserByUID(uid models.UID, envelope models.Envelope) error {
 		return err
 	}
 	return nil
+}
+
+func SetDefaultUserByUID(uid models.UID) (*models.User, error) {
+	user, err := FindUserByUID(uid)
+	if err == nil {
+		return user, nil
+	} else if err.Error() == mongo.ErrNoDocuments.Error() {
+		collection := MG.Collection(models.User{}.CollectionName())
+		newUser := models.User{uid, models.WalletListData{0, []models.Envelope{}}}
+		_, ierr := collection.InsertOne(context.TODO(), newUser)
+		if ierr != nil {
+			return nil, ierr
+		}
+		return &newUser, nil
+	} else {
+		return nil, err
+	}
 }

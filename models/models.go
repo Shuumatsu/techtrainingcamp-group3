@@ -70,6 +70,10 @@ func (User) CollectionName() string {
 	return "user"
 }
 
+func (w *WalletListData) Size() int {
+	return len(w.EnvelopeList)
+}
+
 func int2str(num uint64) string {
 	if num == 0 {
 		return "0"

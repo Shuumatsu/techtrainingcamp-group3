@@ -3,11 +3,12 @@ package handler
 import (
 	"math/rand"
 	"net/http"
-	"strings"
 	"techtrainingcamp-group3/config"
-	"techtrainingcamp-group3/db"
+	"techtrainingcamp-group3/db/mongo"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
+	"techtrainingcamp-group3/tools"
+	"time"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,36 +26,42 @@ func SnatchHandler(c *gin.Context) {
 			"msg":  "fail",
 		})
 	} else {
-		var user db.User
 		max_count := config.MaxSnatchAmount
-		cur_count := 0
-		if err := db.DB.Table(db.User{}.TableName()).First(
-			&user, req.Uid).Error; err == nil {
-			cur_count = strings.Count(user.EnvelopeList, ",") + 1
+		user, err := mongo.SetDefaultUserByUID(req.Uid)
+		if err != nil {
+			c.JSON(200, gin.H{
+				"code": 3,
+				"msg":  "database error",
+			})
+			return
 		}
-		if cur_count >= max_count {
+		if user.Wallet.Size() >= max_count {
 			c.JSON(200, gin.H{
 				"code": 2,
 				"msg":  "too many envelopes",
 			})
-		} else {
-			if eid, err := db.UpdateUsersEnvelope(user, cur_count); err != nil {
-				c.JSON(200, gin.H{
-					"code": 3,
-					"msg":  "database error",
-				})
-			} else {
-				c.JSON(200, gin.H{
-					"code": 0,
-					"msg":  "success",
-					"data": gin.H{
-						"envelope_id": eid,
-						"max_count":   max_count,
-						"cur_count":   cur_count + 1,
-					},
-				})
-			}
+			return
 		}
+		envelope := tools.REPool.Snatch()
+		err = mongo.AddEnvelopeToUserByUID(req.Uid, models.Envelope{
+			models.EID(envelope.Eid), false, uint64(envelope.Money), time.Now().Unix(),
+		})
+		if err != nil {
+			c.JSON(200, gin.H{
+				"code": 3,
+				"msg":  "database error",
+			})
+			return
+		}
+		// TODO: redis
+		c.JSON(200, gin.H{
+			"code": 0,
+			"msg":  "success",
+			"data": gin.H{
+				"envelope_id": envelope.Eid,
+				"max_count":   max_count,
+				"cur_count":   user.Wallet.Size() + 1,
+			},
+		})
 	}
 }
-
