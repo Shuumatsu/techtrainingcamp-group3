@@ -32,7 +32,7 @@ func WalletListHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": FAIL,
-			"msg":  "fail",
+			"msg":  err.Error(),
 		})
 		logger.Sugar.Debugw("WalletListHandler",
 			"get Envelopes error", err)
