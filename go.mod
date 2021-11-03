@@ -6,6 +6,7 @@ require (
 	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/godruoyi/go-snowflake v0.0.2-alpha
 	github.com/joho/godotenv v1.4.0
 	github.com/philandstuff/dhall-golang/v6 v6.0.2
 	go.mongodb.org/mongo-driver v1.7.3
