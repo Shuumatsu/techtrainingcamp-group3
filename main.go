@@ -6,8 +6,8 @@ import (
 	"techtrainingcamp-group3/api/router"
 	"techtrainingcamp-group3/config"
 	_ "techtrainingcamp-group3/db"
-	_ "techtrainingcamp-group3/db/mongo"
-	_ "techtrainingcamp-group3/db/redis"
+	_ "techtrainingcamp-group3/db/mg"
+	_ "techtrainingcamp-group3/db/rds"
 	"techtrainingcamp-group3/logger"
 
 	"github.com/gin-gonic/gin"

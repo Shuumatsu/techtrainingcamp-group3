@@ -1,5 +1,9 @@
 package models
 
+import (
+	"encoding/json"
+)
+
 type ErrorCode uint64
 
 type UID uint64
@@ -62,8 +66,16 @@ type WalletListResp struct {
 }
 
 type User struct {
-	Uid    UID            `bson:"uid"`
-	Wallet WalletListData `bson:"wallet"`
+	Uid    UID            `json:"uid" bson:"uid"`
+	Wallet WalletListData `json:"wallet" bson:"wallet"`
+}
+
+func (u *User) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(u)
+}
+
+func (u *User) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, u)
 }
 
 func (User) CollectionName() string {
