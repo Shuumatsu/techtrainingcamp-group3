@@ -12,6 +12,9 @@ services:
   redis:
     image: redis:6.2.6
     restart: always
+  mongo:
+    image: mongo:5.0.3
+    restart: always
   main:
     build: .
     ports:
@@ -19,7 +22,9 @@ services:
     depends_on:
       - mysql
       - redis
+      - mongo
     restart: always
     environment:
       DB_HOST: mysql
       REDIS_HOST: redis
+      MONGO_HOST: mongo

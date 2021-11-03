@@ -24,6 +24,10 @@ type Environment struct {
 	RedisHost   string
 	RedisPort   string
 
+	MongoHost   string
+	MongoPort   string
+	MongoDBName string
+
 	GinMode string
 
 	LogLevel string
@@ -50,6 +54,10 @@ func init() {
 		RedisPasswd: os.Getenv("REDIS_PASSWD"),
 		RedisHost:   os.Getenv("REDIS_HOST"),
 		RedisPort:   os.Getenv("REDIS_PORT"),
+
+		MongoHost:   os.Getenv("MONGO_HOST"),
+		MongoPort:   os.Getenv("MONGO_PORT"),
+		MongoDBName: os.Getenv("MONGO_DBNAME"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 
