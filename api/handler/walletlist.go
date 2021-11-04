@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
-	"techtrainingcamp-group3/db/mg"
-	rd "techtrainingcamp-group3/db/rds"
+	"techtrainingcamp-group3/db/dbmodels"
+	"techtrainingcamp-group3/db/mysql/sqlAPI"
+	rd "techtrainingcamp-group3/db/redis"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 )
@@ -29,7 +31,7 @@ func WalletListHandler(c *gin.Context) {
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
 
-	user, err := GetUserByUID(req.Uid)
+	user, err := getUserByUID(req.Uid)
 	// fail
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -40,6 +42,17 @@ func WalletListHandler(c *gin.Context) {
 			"get Envelopes error", err)
 		return
 	}
+	// hide value if the envelope is not open
+	err = hideValueByOpened(user)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"code": FAIL,
+			"msg":  err.Error(),
+		})
+		logger.Sugar.Debugw("WalletListHandler",
+			"hide value error", err)
+		return
+	}
 	// success
 	c.JSON(200, models.WalletListResp{
 		Code: SUCCESS,
@@ -48,8 +61,20 @@ func WalletListHandler(c *gin.Context) {
 	})
 }
 
-func GetUserByUID(uid models.UID) (*models.User, error) {
-	var user models.User
+func hideValueByOpened(wallet *models.WalletListData) error {
+	if wallet == nil {
+		return fmt.Errorf("the wallet is nil")
+	}
+	for i := 0; i < len(wallet.EnvelopeList); i++ {
+		if wallet.EnvelopeList[i].Opened == false {
+			wallet.EnvelopeList[i].Value = 0
+		}
+	}
+	return nil
+}
+
+func getUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
+	var user dbmodels.User
 	// 查询redis缓存
 	err := rd.RD.Get(uid.String()).Scan(&user)
 	if err != nil && err != redis.Nil {
@@ -61,5 +86,5 @@ func GetUserByUID(uid models.UID) (*models.User, error) {
 		return &user, nil
 	}
 	// 查询mongodb
-	return mg.FindUserByUID(uid)
+	return sqlAPI.FindUserByUID(uid)
 }

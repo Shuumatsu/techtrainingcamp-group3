@@ -2,7 +2,7 @@ package handler
 
 import (
 	"net/http"
-	"techtrainingcamp-group3/db"
+	"techtrainingcamp-group3/db/mysql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 
@@ -47,7 +47,7 @@ func OpenHandler(c *gin.Context) {
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 
 	//get envelope by envelope_id and user_id
-	envelopeP := db.GetEnvelope(req.EnvelopeId, uint64(req.Uid))
+	envelopeP := sqlAPI.GetEnvelope(req.EnvelopeId, uint64(req.Uid))
 	if envelopeP == nil {
 		c.JSON(200, gin.H{
 			"code": NoExist,
@@ -60,7 +60,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//get user by user_id
-	userP := db.GetUser(uint64(req.Uid))
+	userP := sqlAPI.GetUser(uint64(req.Uid))
 	if userP == nil {
 		c.JSON(200, gin.H{
 			"code": NoUser,
@@ -85,7 +85,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//Update envelope status and user amount
-	if err = db.UpdateEnvelopeOpen(envelopeP, userP); err != nil {
+	if err = sqlAPI.UpdateEnvelopeOpen(envelopeP, userP); err != nil {
 		logger.Sugar.Errorw("OpenHandler update error")
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return

@@ -1,4 +1,4 @@
-package rds
+package redis
 
 import (
 	"github.com/go-redis/redis"
@@ -6,7 +6,8 @@ import (
 	"techtrainingcamp-group3/logger"
 )
 
-var RD *redis.Client
+var userRds *redis.Client
+var envelopeRds *redis.Client
 
 func init() {
 	option := redis.Options{
@@ -21,6 +22,6 @@ func init() {
 			"error msg", err.Error())
 		panic(err)
 	}
-	RD = rd
-	logger.Sugar.Debugw("redis init", "redis config", RD)
+	userRds = rd
+	logger.Sugar.Debugw("redis init", "redis config", userRds)
 }

@@ -1,4 +1,4 @@
-package rds
+package redis
 
 import (
 	"techtrainingcamp-group3/logger"

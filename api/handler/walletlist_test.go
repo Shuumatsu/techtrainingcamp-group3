@@ -5,7 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
-	"techtrainingcamp-group3/db/rds"
+	"techtrainingcamp-group3/db/redis"
 	"techtrainingcamp-group3/models"
 	"testing"
 	"time"
@@ -13,7 +13,7 @@ import (
 
 func InsertTestDataInRedis() {
 	rand.Seed(time.Now().Unix())
-	rds.RD.Set(strconv.Itoa(5), models.User{
+	redis.RD.Set(strconv.Itoa(5), models.User{
 		Uid: 5,
 		Wallet: models.WalletListData{
 			Amount:       7646,
@@ -40,7 +40,7 @@ func InsertTestDataInRedis() {
 				EnvelopeList: envelopes,
 			},
 		}
-		_, err := rds.RD.Set(user.Uid.String(), &user, 0).Result()
+		_, err := redis.RD.Set(user.Uid.String(), &user, 0).Result()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,7 +49,7 @@ func InsertTestDataInRedis() {
 
 func TestRedisGetUserByUID(t *testing.T) {
 	InsertTestDataInRedis()
-	user, err := GetUserByUID(1)
+	user, err := getUserByUID(1)
 	if err != nil {
 		t.Fatal(err)
 	}
