@@ -1,15 +1,15 @@
 package handler
 
 import (
+	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"techtrainingcamp-group3/config"
-	"techtrainingcamp-group3/db/mongo"
+	"techtrainingcamp-group3/db/mg"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 	"techtrainingcamp-group3/tools"
 	"time"
-	"github.com/gin-gonic/gin"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -27,7 +27,7 @@ func SnatchHandler(c *gin.Context) {
 		})
 	} else {
 		max_count := config.MaxSnatchAmount
-		user, err := mongo.SetDefaultUserByUID(req.Uid)
+		user, err := mg.SetDefaultUserByUID(req.Uid)
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": 3,
@@ -43,8 +43,11 @@ func SnatchHandler(c *gin.Context) {
 			return
 		}
 		envelope := tools.REPool.Snatch()
-		err = mongo.AddEnvelopeToUserByUID(req.Uid, models.Envelope{
-			models.EID(envelope.Eid), false, uint64(envelope.Money), time.Now().Unix(),
+		err = mg.AddEnvelopeToUserByUID(req.Uid, models.Envelope{
+			EnvelopeId: models.EID(envelope.Eid),
+			Opened: false,
+			Value: uint64(envelope.Money),
+			SnatchTime: time.Now().Unix(),
 		})
 		if err != nil {
 			c.JSON(200, gin.H{

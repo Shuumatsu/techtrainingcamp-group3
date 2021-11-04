@@ -53,9 +53,15 @@ func SetDefaultUserByUID(uid models.UID) (*models.User, error) {
 	user, err := FindUserByUID(uid)
 	if err == nil {
 		return user, nil
-	} else if err.Error() == mongo.ErrNoDocuments.Error() {
+	} else if err == mongo.ErrNoDocuments {
 		collection := MG.Collection(models.User{}.CollectionName())
-		newUser := models.User{uid, models.WalletListData{0, []models.Envelope{}}}
+		newUser := models.User{
+			Uid: uid,
+			Wallet: models.WalletListData{
+				Amount: 0,
+				EnvelopeList: []models.Envelope{},
+			},
+		}
 		_, ierr := collection.InsertOne(context.TODO(), newUser)
 		if ierr != nil {
 			return nil, ierr

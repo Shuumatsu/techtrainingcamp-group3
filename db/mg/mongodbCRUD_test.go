@@ -44,7 +44,7 @@ func TestFindUserByUID(t *testing.T) {
 }
 func TestAddEnvelopeToUserByUID(t *testing.T) {
 	showTestData()
-	err := AddEnvelopeToUserByUID(1, models.Envelope{
+	err := AddEnvelopeToUserByUID(5, models.Envelope{
 		EnvelopeId: 646,
 		Opened:     false,
 		Value:      646461,
@@ -63,7 +63,7 @@ func insertTestDate() {
 		Uid: 5,
 		Wallet: models.WalletListData{
 			Amount:       0,
-			EnvelopeList: nil,
+			EnvelopeList: []models.Envelope{},
 		},
 	})
 	e := 0
