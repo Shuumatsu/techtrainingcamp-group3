@@ -5,14 +5,26 @@ import (
 	"techtrainingcamp-group3/db/dbmodels"
 )
 
-func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
-	return nil, fmt.Errorf("the function not defined")
+type redisAPIError struct {
+	FuncNotDefined   error
+	UserNotExist     error
+	EnvelopeNotExist error
 }
 
-func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
-	return nil, fmt.Errorf("the function not defined")
+var RdeisError redisAPIError
+
+func init() {
+	RdeisError.FuncNotDefined = fmt.Errorf("the function is not defined")
+}
+
+func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
+	return dbmodels.User{}, RdeisError.FuncNotDefined
+}
+
+func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
+	return dbmodels.Envelope{}, RdeisError.FuncNotDefined
 }
 
 func OpenEnvelopeByEID(eid dbmodels.EID) error {
-	return fmt.Errorf("the function not defined")
+	return RdeisError.FuncNotDefined
 }
