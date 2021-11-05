@@ -7,7 +7,7 @@ import (
 	"techtrainingcamp-group3/db/dbmodels"
 )
 
-func parseEnvelopeList(envelopeList string) ([]dbmodels.EID, error) {
+func ParseEnvelopeList(envelopeList string) ([]dbmodels.EID, error) {
 	envelopesID := make([]dbmodels.EID, 0)
 	for _, token := range strings.Split(envelopeList, ",") {
 		if len(token) == 0 {

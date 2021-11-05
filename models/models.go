@@ -3,13 +3,20 @@ package models
 type ErrorCode uint64
 
 const (
-	SUCCESS = iota
+	Success ErrorCode = iota
+	NotFound
+	ParseError
+	NotDefined
 )
 
 func (e ErrorCode) Message() string {
 	switch e {
-	case SUCCESS:
+	case Success:
 		return "success"
+	case NotFound:
+		return "not found"
+	case ParseError:
+		return "the envelope list parse error"
 	default:
 		return "not defined"
 	}

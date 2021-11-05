@@ -2,6 +2,7 @@ package dbmodels
 
 import (
 	"encoding/json"
+	"techtrainingcamp-group3/models"
 	"time"
 )
 
@@ -50,6 +51,16 @@ func (e *Envelope) MarshalBinary() (data []byte, err error) {
 }
 func (e *Envelope) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, e)
+}
+func (e Envelope) ToResqModel() models.Envelope {
+	var envelope models.Envelope
+	envelope.EnvelopeId = uint64(e.EnvelopeId)
+	envelope.Opened = e.Opened
+	if e.Opened != false {
+		envelope.Value = e.Value
+	}
+	envelope.SnatchTime = e.SnatchTime
+	return envelope
 }
 
 func int2str(num uint64) string {

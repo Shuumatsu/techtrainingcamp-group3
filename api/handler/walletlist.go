@@ -1,90 +1,55 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/mysql/sqlAPI"
-	rd "techtrainingcamp-group3/db/redis"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 )
-
-const (
-	SUCCESS = iota
-	FAIL
-)
-
-type WalletListUser struct {
-	Uid          uint64 `gorm:"uid"`
-	EnvelopeList string `gorm:"envelope_list"`
-}
-
-func (WalletListUser) TableName() string {
-	return "user"
-}
 
 func WalletListHandler(c *gin.Context) {
 	var req models.WalletListReq
 	c.Bind(&req)
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
+	// TODO: redis
 
-	user, err := getUserByUID(req.Uid)
-	// fail
+	// TODO: mysql
+	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
+	// if mysql not found
 	if err != nil {
 		c.JSON(200, gin.H{
-			"code": FAIL,
-			"msg":  err.Error(),
+			"code": models.NotDefined,
+			"msg":  models.NotDefined.Message(),
 		})
 		logger.Sugar.Debugw("WalletListHandler",
-			"get Envelopes error", err)
+			"not found in mysql", err)
 		return
 	}
-	// hide value if the envelope is not open
-	err = hideValueByOpened(user)
+	// find envelopes which belong to the user
+	envelopes, err := sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
 	if err != nil {
 		c.JSON(200, gin.H{
-			"code": FAIL,
-			"msg":  err.Error(),
+			"code": models.NotDefined,
+			"msg":  models.NotDefined.Message(),
 		})
 		logger.Sugar.Debugw("WalletListHandler",
-			"hide value error", err)
+			"not found in mysql", err)
 		return
+	}
+	// change envelopes to resq model
+	envelopesResq := make([]models.Envelope, len(envelopes))
+	for i := 0; i < len(envelopes); i++ {
+		envelopesResq[i] = envelopes[i].ToResqModel()
 	}
 	// success
 	c.JSON(200, models.WalletListResp{
-		Code: SUCCESS,
-		Msg:  "success",
-		Data: user.Wallet,
+		Code: models.Success,
+		Msg:  models.Success.Message(),
+		Data: models.WalletListData{
+			Amount:       user.Amount,
+			EnvelopeList: envelopesResq,
+		},
 	})
-}
-
-func hideValueByOpened(wallet *models.WalletListData) error {
-	if wallet == nil {
-		return fmt.Errorf("the wallet is nil")
-	}
-	for i := 0; i < len(wallet.EnvelopeList); i++ {
-		if wallet.EnvelopeList[i].Opened == false {
-			wallet.EnvelopeList[i].Value = 0
-		}
-	}
-	return nil
-}
-
-func getUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
-	var user dbmodels.User
-	// 查询redis缓存
-	err := rd.RD.Get(uid.String()).Scan(&user)
-	if err != nil && err != redis.Nil {
-		// redis error
-		logger.Sugar.Debugw("redis", "error", err)
-	}
-	if err != redis.Nil {
-		// 命中缓存
-		return &user, nil
-	}
-	// 查询mongodb
-	return sqlAPI.FindUserByUID(uid)
 }
