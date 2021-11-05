@@ -8,3 +8,4 @@ RUN go env -w GO111MODULE="on" \
 && go env -w GOPROXY="https://goproxy.cn,direct"
 RUN go mod tidy
 CMD ["go", "run", "main.go"]
+EXPOSE 8080

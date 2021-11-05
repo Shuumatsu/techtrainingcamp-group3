@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"techtrainingcamp-group3/config"
+	"techtrainingcamp-group3/logger"
 )
 
 type Database struct {
@@ -27,4 +28,5 @@ func init() {
 		panic(err)
 	}
 	DB = db
+	logger.Sugar.Debugw("mysql init", "mysql config", dsn)
 }
