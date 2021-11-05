@@ -25,10 +25,10 @@ func (e EID) String() string {
 }
 
 type User struct {
-	Uid          UID       `gorm:"uid" json:"uid"`
-	Amount       uint64    `gorm:"amount" json:"amount"`
-	EnvelopeList string    `gorm:"envelope_list" json:"envelope_list"`
-	UpdatedAt    time.Time `gorm:"updated_at" json:"updated_at"`
+	Uid          UID       `gorm:"column:uid; PRIMARY_KEY" json:"uid"`
+	Amount       uint64    `gorm:"column:amount" json:"amount"`
+	EnvelopeList string    `gorm:"column:envelope_list" json:"envelope_list"`
+	UpdatedAt    time.Time `gorm:"column:updated_at" json:"updated_at"`
 }
 
 func (User) TableName() string {
@@ -42,11 +42,11 @@ func (u *User) UnmarshalBinary(data []byte) error {
 }
 
 type Envelope struct {
-	EnvelopeId EID    `gorm:"envelope_id" json:"envelope_id"`
-	Uid        UID    `gorm:"uid" json:"uid"`
-	Opened     bool   `gorm:"opened" json:"opened"`
-	Value      uint64 `gorm:"value" json:"value"`
-	SnatchTime int64  `gorm:"snatch_time" json:"snatch_time"`
+	EnvelopeId EID    `gorm:"column:envelope_id; PRIMARY_KEY" json:"envelope_id"`
+	Uid        UID    `gorm:"column:uid" json:"uid"`
+	Opened     bool   `gorm:"column:opened" json:"opened"`
+	Value      uint64 `gorm:"column:value" json:"value"`
+	SnatchTime int64  `gorm:"column:snatch_time" json:"snatch_time"`
 }
 
 func (Envelope) TableName() string {
