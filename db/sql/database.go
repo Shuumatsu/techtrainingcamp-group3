@@ -11,7 +11,7 @@ type Database struct {
 	*gorm.DB
 }
 
-var Sql *gorm.DB
+var DB *gorm.DB
 
 // Opening a database and save the reference to `Database` struct.
 func init() {
@@ -26,5 +26,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	Sql = db
+	DB = db
 }

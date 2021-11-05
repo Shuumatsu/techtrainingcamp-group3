@@ -5,7 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 	"techtrainingcamp-group3/config"
-	"techtrainingcamp-group3/db/mg"
+	"techtrainingcamp-group3/db/dbmodels"
+	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 	"techtrainingcamp-group3/tools"
@@ -27,7 +28,7 @@ func SnatchHandler(c *gin.Context) {
 		})
 	} else {
 		max_count := config.MaxSnatchAmount
-		user, err := mg.SetDefaultUserByUID(req.Uid)
+		user, err := sqlAPI.FindOrCreateUserByUID(dbmodels.UID(req.Uid))
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": 3,
@@ -35,7 +36,8 @@ func SnatchHandler(c *gin.Context) {
 			})
 			return
 		}
-		if user.Wallet.Size() >= max_count {
+		envelopesId, err := sqlAPI.ParseEnvelopeList(user.EnvelopeList)
+		if len(envelopesId) >= max_count {
 			c.JSON(200, gin.H{
 				"code": 2,
 				"msg":  "too many envelopes",
@@ -43,10 +45,11 @@ func SnatchHandler(c *gin.Context) {
 			return
 		}
 		envelope := tools.REPool.Snatch()
-		err = mg.AddEnvelopeToUserByUID(req.Uid, models.Envelope{
-			EnvelopeId: models.EID(envelope.Eid),
-			Opened: false,
-			Value: uint64(envelope.Money),
+		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), dbmodels.Envelope{
+			EnvelopeId: dbmodels.EID(envelope.Eid),
+			Uid:        user.Uid,
+			Opened:     false,
+			Value:      uint64(envelope.Money),
 			SnatchTime: time.Now().Unix(),
 		})
 		if err != nil {
@@ -63,7 +66,7 @@ func SnatchHandler(c *gin.Context) {
 			"data": gin.H{
 				"envelope_id": envelope.Eid,
 				"max_count":   max_count,
-				"cur_count":   user.Wallet.Size() + 1,
+				"cur_count":   len(envelopesId) + 1,
 			},
 		})
 	}

@@ -1,6 +1,7 @@
 package sqlAPI
 
 import (
+	"techtrainingcamp-group3/db/sql"
 	"techtrainingcamp-group3/logger"
 	"time"
 )
@@ -8,7 +9,7 @@ import (
 func GetEnvelope(envelope_id, user_id uint64) *Envelope {
 	var envelope Envelope
 	//get envelope according to envelope_id
-	if err := DB.Table(Envelope{}.TableName()).First(&envelope, envelope_id).Error; err != nil {
+	if err := sql.DB.Table(Envelope{}.TableName()).First(&envelope, envelope_id).Error; err != nil {
 		logger.Sugar.Warnw("GetEnvelope can not find envelope ", "envelope_id", envelope_id)
 		return nil
 	}
@@ -23,7 +24,7 @@ func GetEnvelope(envelope_id, user_id uint64) *Envelope {
 
 func GetUser(user_id uint64) *OpenUser {
 	var openUser OpenUser
-	if err := DB.Table(OpenUser{}.TableName()).First(&openUser, user_id).Error; err != nil {
+	if err := sql.DB.Table(OpenUser{}.TableName()).First(&openUser, user_id).Error; err != nil {
 		logger.Sugar.Warnw("open fail: cannot find user", "user_id", user_id)
 		return nil
 	}
@@ -32,7 +33,7 @@ func GetUser(user_id uint64) *OpenUser {
 
 func UpdateEnvelopeOpen(p *Envelope, u *OpenUser) error {
 	//update envelope's open_stat and snatch_time
-	tx := DB.Begin()
+	tx := sql.DB.Begin()
 	if err := tx.Table(Envelope{}.TableName()).Model(p).Updates(Envelope{Open_stat: true, Snatched_time: time.Now()}).Error; err != nil {
 		logger.Sugar.Errorw("UpdateEnvelopeOpen fail", "envelope_id", p.Envelope_id)
 		tx.Rollback()

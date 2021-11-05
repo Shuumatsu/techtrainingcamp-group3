@@ -16,6 +16,10 @@ func FindEnvelopesByUID(uid dbmodels.UID) ([]dbmodels.Envelope, error) {
 	return nil, Error.FuncNotDefined
 }
 
+func AddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error {
+	return Error.FuncNotDefined
+}
+
 func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
 	return dbmodels.Envelope{}, Error.FuncNotDefined
 }
