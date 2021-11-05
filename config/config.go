@@ -1,9 +1,9 @@
 package config
 
 import (
-	"os"
 	"github.com/joho/godotenv"
 	"github.com/philandstuff/dhall-golang/v6"
+	"os"
 )
 
 const (
@@ -30,13 +30,11 @@ type Environment struct {
 	DBPort   string
 	DBName   string
 
-	RedisPasswd string
-	RedisHost   string
-	RedisPort   string
-
-	MongoHost   string
-	MongoPort   string
-	MongoDBName string
+	RedisPasswd     string
+	RedisHost       string
+	RedisPort       string
+	RedisUserDB     string
+	RedisEnvelopeDB string
 
 	GinMode string
 
@@ -61,13 +59,11 @@ func init() {
 		DBPort:   os.Getenv("DB_PORT"),
 		DBName:   os.Getenv("DB_NAME"),
 
-		RedisPasswd: os.Getenv("REDIS_PASSWD"),
-		RedisHost:   os.Getenv("REDIS_HOST"),
-		RedisPort:   os.Getenv("REDIS_PORT"),
-
-		MongoHost:   os.Getenv("MONGO_HOST"),
-		MongoPort:   os.Getenv("MONGO_PORT"),
-		MongoDBName: os.Getenv("MONGO_DBNAME"),
+		RedisPasswd:     os.Getenv("REDIS_PASSWD"),
+		RedisHost:       os.Getenv("REDIS_HOST"),
+		RedisPort:       os.Getenv("REDIS_PORT"),
+		RedisUserDB:     os.Getenv("REDIS_USER_DB"),
+		RedisEnvelopeDB: os.Getenv("redis_envelope_db"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 
