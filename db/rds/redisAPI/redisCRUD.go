@@ -1,24 +1,11 @@
 package redisAPI
 
 import (
-	"fmt"
-	"github.com/go-redis/redis"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds"
+	"techtrainingcamp-group3/logger"
 	"time"
 )
-
-type redisApiError struct {
-	FuncNotDefined error
-	NotFound       error
-}
-
-var RedisApiError redisApiError
-
-func init() {
-	RedisApiError.FuncNotDefined = fmt.Errorf("the function is not defined")
-	RedisApiError.NotFound = redis.Nil
-}
 
 // SetUserByUID
 //
@@ -28,6 +15,7 @@ func init() {
 func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
 	err := rds.UserRds.Set(user.Uid.String(), user, expiration).Err()
 	if err != nil {
+		logger.Sugar.Errorw("redis: set user by uid", "error", err)
 		return err
 	}
 	return nil
@@ -45,6 +33,7 @@ func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
 func SetEnvelopeByEID(envelope dbmodels.Envelope, expiration time.Duration) error {
 	err := rds.UserRds.Set(envelope.EnvelopeId.String(), envelope, expiration).Err()
 	if err != nil {
+		logger.Sugar.Errorw("redis: set envelope by eid", "error", err)
 		return err
 	}
 	return nil
