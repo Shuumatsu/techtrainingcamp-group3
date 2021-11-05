@@ -6,7 +6,7 @@ import (
 	"techtrainingcamp-group3/logger"
 )
 
-var Rds *redis.Client
+var DB *redis.Client
 
 func init() {
 	// init user db
@@ -21,6 +21,6 @@ func init() {
 			"ping redis result", pingResult,
 			"error msg", err.Error())
 	}
-	Rds = rd
-	logger.Sugar.Debugw("redis init", "redis userdb config", Rds)
+	DB = rd
+	logger.Sugar.Debugw("redis init", "redis userdb config", DB)
 }
