@@ -63,7 +63,7 @@ func init() {
 		RedisHost:       os.Getenv("REDIS_HOST"),
 		RedisPort:       os.Getenv("REDIS_PORT"),
 		RedisUserDB:     os.Getenv("REDIS_USER_DB"),
-		RedisEnvelopeDB: os.Getenv("redis_envelope_db"),
+		RedisEnvelopeDB: os.Getenv("REDIS_ENVELOPE_DB"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 

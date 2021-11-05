@@ -14,7 +14,7 @@ func init() {
 	// init user db
 	redisUserDB, err := strconv.Atoi(config.Env.RedisUserDB)
 	if err != nil {
-		logger.Sugar.Fatal("the redis user db must be a number")
+		logger.Sugar.Fatal("the redis envelope db must be a number", "redis user db", config.Env.RedisUserDB)
 	}
 	option := redis.Options{
 		Addr:     config.Env.RedisHost + ":" + config.Env.RedisPort,
@@ -33,7 +33,7 @@ func init() {
 	// init envelope db
 	redisEnvelopeDB, err := strconv.Atoi(config.Env.RedisEnvelopeDB)
 	if err != nil {
-		logger.Sugar.Fatal("the redis envelope db must be a number")
+		logger.Sugar.Fatal("the redis envelope db must be a number", "redis envelope db", config.Env.RedisEnvelopeDB)
 	}
 	option = redis.Options{
 		Addr:     config.Env.RedisHost + ":" + config.Env.RedisPort,
