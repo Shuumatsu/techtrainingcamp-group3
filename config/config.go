@@ -30,11 +30,9 @@ type Environment struct {
 	DBPort   string
 	DBName   string
 
-	RedisPasswd     string
-	RedisHost       string
-	RedisPort       string
-	RedisUserDB     string
-	RedisEnvelopeDB string
+	RedisPasswd string
+	RedisHost   string
+	RedisPort   string
 
 	GinMode string
 
@@ -59,11 +57,9 @@ func init() {
 		DBPort:   os.Getenv("DB_PORT"),
 		DBName:   os.Getenv("DB_NAME"),
 
-		RedisPasswd:     os.Getenv("REDIS_PASSWD"),
-		RedisHost:       os.Getenv("REDIS_HOST"),
-		RedisPort:       os.Getenv("REDIS_PORT"),
-		RedisUserDB:     os.Getenv("REDIS_USER_DB"),
-		RedisEnvelopeDB: os.Getenv("REDIS_ENVELOPE_DB"),
+		RedisPasswd: os.Getenv("REDIS_PASSWD"),
+		RedisHost:   os.Getenv("REDIS_HOST"),
+		RedisPort:   os.Getenv("REDIS_PORT"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 
