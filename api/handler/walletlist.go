@@ -18,7 +18,7 @@ func WalletListHandler(c *gin.Context) {
 	// TODO: mysql
 	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	// if mysql not found
-	if err == sqlAPI.SqlApiError.FuncNotDefined {
+	if err == sqlAPI.Error.FuncNotDefined {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotDefined,
 			Msg:  models.NotDefined.Message(),
@@ -30,7 +30,7 @@ func WalletListHandler(c *gin.Context) {
 	}
 	// find envelopes which belong to the user
 	envelopes, err := sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
-	if err == sqlAPI.SqlApiError.FuncNotDefined {
+	if err == sqlAPI.Error.FuncNotDefined {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotDefined,
 			Msg:  models.NotDefined.Message(),

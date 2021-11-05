@@ -10,9 +10,9 @@ type redisApiError struct {
 	NotFound       error
 }
 
-var RedisApiError redisApiError
+var Error redisApiError
 
 func init() {
-	RedisApiError.FuncNotDefined = fmt.Errorf("the function is not defined")
-	RedisApiError.NotFound = redis.Nil
+	Error.FuncNotDefined = fmt.Errorf("the function is not defined")
+	Error.NotFound = redis.Nil
 }

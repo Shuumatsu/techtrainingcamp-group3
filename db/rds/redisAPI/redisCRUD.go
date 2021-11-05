@@ -22,7 +22,7 @@ func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
 }
 
 func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, RedisApiError.FuncNotDefined
+	return dbmodels.User{}, Error.FuncNotDefined
 }
 
 // SetEnvelopeByEID
@@ -39,9 +39,9 @@ func SetEnvelopeByEID(envelope dbmodels.Envelope, expiration time.Duration) erro
 	return nil
 }
 func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
-	return dbmodels.Envelope{}, RedisApiError.FuncNotDefined
+	return dbmodels.Envelope{}, Error.FuncNotDefined
 }
 
 func OpenEnvelopeByEID(eid dbmodels.EID) error {
-	return RedisApiError.FuncNotDefined
+	return Error.FuncNotDefined
 }

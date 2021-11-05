@@ -5,21 +5,21 @@ import (
 )
 
 func FindOrCreateUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, SqlApiError.FuncNotDefined
+	return dbmodels.User{}, Error.FuncNotDefined
 }
 
 func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, SqlApiError.FuncNotDefined
+	return dbmodels.User{}, Error.FuncNotDefined
 }
 
 func FindEnvelopesByUID(uid dbmodels.UID) ([]dbmodels.Envelope, error) {
-	return nil, SqlApiError.FuncNotDefined
+	return nil, Error.FuncNotDefined
 }
 
 func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
-	return dbmodels.Envelope{}, SqlApiError.FuncNotDefined
+	return dbmodels.Envelope{}, Error.FuncNotDefined
 }
 
 func OpenEnvelopeByEID(eid dbmodels.EID) error {
-	return SqlApiError.FuncNotDefined
+	return Error.FuncNotDefined
 }

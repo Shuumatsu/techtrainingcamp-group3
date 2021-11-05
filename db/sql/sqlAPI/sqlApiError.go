@@ -6,8 +6,8 @@ type sqlApiError struct {
 	FuncNotDefined error
 }
 
-var SqlApiError sqlApiError
+var Error sqlApiError
 
 func init() {
-	SqlApiError.FuncNotDefined = fmt.Errorf("the function is not defined")
+	Error.FuncNotDefined = fmt.Errorf("the function is not defined")
 }
