@@ -27,16 +27,16 @@ func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
 //
 // 如果redis中不存在该user, 返回NotFound
 // 如果redis的get操作发生错误, 返回error
-func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
+func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
 	var user dbmodels.User
 	err := rds.DB.Get(uid.Key()).Scan(&user)
 	if err != nil {
 		if err == redis.Nil {
-			return dbmodels.User{}, Error.NotFound
+			return nil, Error.NotFound
 		}
-		return dbmodels.User{}, err
+		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
 
 // SetEnvelopeByEID
@@ -58,14 +58,14 @@ func SetEnvelopeByEID(envelope dbmodels.Envelope, expiration time.Duration) erro
 //
 // 如果redis中不存在该envelope, 返回NotFound
 // 如果redis的get操作发生错误, 返回error
-func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
+func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
 	err := rds.DB.Get(eid.Key()).Scan(&envelope)
 	if err != nil {
 		if err == redis.Nil {
-			return dbmodels.Envelope{}, Error.NotFound
+			return nil, Error.NotFound
 		}
-		return dbmodels.Envelope{}, err
+		return nil, err
 	}
-	return envelope, nil
+	return &envelope, nil
 }
