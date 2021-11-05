@@ -11,20 +11,20 @@ type redisAPIError struct {
 	EnvelopeNotExist error
 }
 
-var RdeisError redisAPIError
+var RedisError redisAPIError
 
 func init() {
-	RdeisError.FuncNotDefined = fmt.Errorf("the function is not defined")
+	RedisError.FuncNotDefined = fmt.Errorf("the function is not defined")
 }
 
 func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, RdeisError.FuncNotDefined
+	return dbmodels.User{}, RedisError.FuncNotDefined
 }
 
 func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
-	return dbmodels.Envelope{}, RdeisError.FuncNotDefined
+	return dbmodels.Envelope{}, RedisError.FuncNotDefined
 }
 
 func OpenEnvelopeByEID(eid dbmodels.EID) error {
-	return RdeisError.FuncNotDefined
+	return RedisError.FuncNotDefined
 }
