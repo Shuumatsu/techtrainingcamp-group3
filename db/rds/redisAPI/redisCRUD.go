@@ -1,6 +1,7 @@
 package redisAPI
 
 import (
+	"github.com/go-redis/redis"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds"
 	"techtrainingcamp-group3/logger"
@@ -13,7 +14,7 @@ import (
 //
 // 设置不成功返回error
 func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
-	err := rds.DB.Set(user.Uid.String(), user, expiration).Err()
+	err := rds.DB.Set(user.Uid.Key(), user, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set user by uid", "error", err)
 		return err
@@ -21,8 +22,21 @@ func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
 	return nil
 }
 
+// FindUserByUID
+// 根据uid在redis中查找user
+//
+// 如果redis中不存在该user, 返回NotFound
+// 如果redis的get操作发生错误, 返回error
 func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, Error.FuncNotDefined
+	var user dbmodels.User
+	err := rds.DB.Get(uid.Key()).Scan(&user)
+	if err != nil {
+		if err == redis.Nil {
+			return dbmodels.User{}, Error.NotFound
+		}
+		return dbmodels.User{}, err
+	}
+	return user, nil
 }
 
 // SetEnvelopeByEID
@@ -31,17 +45,27 @@ func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
 //
 // 设置不成功返回error
 func SetEnvelopeByEID(envelope dbmodels.Envelope, expiration time.Duration) error {
-	err := rds.DB.Set(envelope.EnvelopeId.String(), envelope, expiration).Err()
+	err := rds.DB.Set(envelope.EnvelopeId.Key(), envelope, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set envelope by eid", "error", err)
 		return err
 	}
 	return nil
 }
-func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
-	return dbmodels.Envelope{}, Error.FuncNotDefined
-}
 
-func OpenEnvelopeByEID(eid dbmodels.EID) error {
-	return Error.FuncNotDefined
+// FindEnvelopeByEID
+// 根据envelope_id在redis中查找envelope
+//
+// 如果redis中不存在该envelope, 返回NotFound
+// 如果redis的get操作发生错误, 返回error
+func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
+	var envelope dbmodels.Envelope
+	err := rds.DB.Get(eid.Key()).Scan(&envelope)
+	if err != nil {
+		if err == redis.Nil {
+			return dbmodels.Envelope{}, Error.NotFound
+		}
+		return dbmodels.Envelope{}, err
+	}
+	return envelope, nil
 }

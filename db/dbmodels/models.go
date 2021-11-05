@@ -8,12 +8,18 @@ import (
 
 type UID uint64
 
+func (u UID) Key() string {
+	return "user:" + u.String()
+}
 func (u UID) String() string {
 	return int2str(uint64(u))
 }
 
 type EID uint64
 
+func (e EID) Key() string {
+	return "envelope:" + e.String()
+}
 func (e EID) String() string {
 	return int2str(uint64(e))
 }
