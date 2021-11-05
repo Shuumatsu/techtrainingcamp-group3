@@ -2,7 +2,7 @@ package handler
 
 import (
 	"net/http"
-	"techtrainingcamp-group3/db/mysql/sqlAPI"
+	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 

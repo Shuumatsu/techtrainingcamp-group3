@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/db/dbmodels"
-	"techtrainingcamp-group3/db/mysql/sqlAPI"
+	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 )
@@ -18,7 +18,7 @@ func WalletListHandler(c *gin.Context) {
 	// TODO: mysql
 	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	// if mysql not found
-	if err == sqlAPI.SqlError.FuncNotDefined {
+	if err == sqlAPI.SqlApiError.FuncNotDefined {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotDefined,
 			Msg:  models.NotDefined.Message(),
@@ -30,7 +30,7 @@ func WalletListHandler(c *gin.Context) {
 	}
 	// find envelopes which belong to the user
 	envelopes, err := sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
-	if err == sqlAPI.SqlError.FuncNotDefined {
+	if err == sqlAPI.SqlApiError.FuncNotDefined {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotDefined,
 			Msg:  models.NotDefined.Message(),

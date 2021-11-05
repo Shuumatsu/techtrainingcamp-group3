@@ -1,4 +1,4 @@
-package mysql
+package sql
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ type Database struct {
 	*gorm.DB
 }
 
-var sql *gorm.DB
+var Sql *gorm.DB
 
 // Opening a database and save the reference to `Database` struct.
 func init() {
@@ -26,5 +26,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	sql = db
+	Sql = db
 }

@@ -1,4 +1,4 @@
-package redis
+package rds
 
 import (
 	"github.com/go-redis/redis"
@@ -7,19 +7,15 @@ import (
 	"techtrainingcamp-group3/logger"
 )
 
-var userRds *redis.Client
-var envelopeRds *redis.Client
+var UserRds *redis.Client
+var EnvelopeRds *redis.Client
 
 func init() {
+	// init user db
 	redisUserDB, err := strconv.Atoi(config.Env.RedisUserDB)
 	if err != nil {
 		logger.Sugar.Fatal("the redis user db must be a number")
 	}
-	redisEnvelopeDB, err := strconv.Atoi(config.Env.RedisEnvelopeDB)
-	if err != nil {
-		logger.Sugar.Fatal("the redis envelope db must be a number")
-	}
-	// init user db
 	option := redis.Options{
 		Addr:     config.Env.RedisHost + ":" + config.Env.RedisPort,
 		Password: config.Env.RedisPasswd,
@@ -32,9 +28,13 @@ func init() {
 			"ping redis result", pingResult,
 			"error msg", err.Error())
 	}
-	userRds = rd
-	logger.Sugar.Debugw("redis init", "redis userdb config", userRds)
+	UserRds = rd
+	logger.Sugar.Debugw("redis init", "redis userdb config", UserRds)
 	// init envelope db
+	redisEnvelopeDB, err := strconv.Atoi(config.Env.RedisEnvelopeDB)
+	if err != nil {
+		logger.Sugar.Fatal("the redis envelope db must be a number")
+	}
 	option = redis.Options{
 		Addr:     config.Env.RedisHost + ":" + config.Env.RedisPort,
 		Password: config.Env.RedisPasswd,
@@ -47,6 +47,6 @@ func init() {
 			"ping redis result", pingResult,
 			"error msg", err.Error())
 	}
-	envelopeRds = rd
-	logger.Sugar.Debugw("redis init", "redis envelopedb config", envelopeRds)
+	EnvelopeRds = rd
+	logger.Sugar.Debugw("redis init", "redis envelopedb config", EnvelopeRds)
 }

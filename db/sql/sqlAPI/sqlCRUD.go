@@ -5,30 +5,30 @@ import (
 	"techtrainingcamp-group3/db/dbmodels"
 )
 
-type sqlAPIError struct {
+type sqlApiError struct {
 	FuncNotDefined error
 }
 
-var SqlError sqlAPIError
+var SqlApiError sqlApiError
 
 func init() {
-	SqlError.FuncNotDefined = fmt.Errorf("the function is not defined")
+	SqlApiError.FuncNotDefined = fmt.Errorf("the function is not defined")
 }
 
 func FindOrCreateUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, SqlError.FuncNotDefined
+	return dbmodels.User{}, SqlApiError.FuncNotDefined
 }
 
 func FindUserByUID(uid dbmodels.UID) (dbmodels.User, error) {
-	return dbmodels.User{}, SqlError.FuncNotDefined
+	return dbmodels.User{}, SqlApiError.FuncNotDefined
 }
 
 func FindEnvelopesByUID(uid dbmodels.UID) ([]dbmodels.Envelope, error) {
-	return nil, SqlError.FuncNotDefined
+	return nil, SqlApiError.FuncNotDefined
 }
 
 func FindEnvelopeByEID(eid dbmodels.EID) (dbmodels.Envelope, error) {
-	return dbmodels.Envelope{}, SqlError.FuncNotDefined
+	return dbmodels.Envelope{}, SqlApiError.FuncNotDefined
 }
 
 func OpenEnvelopeByEID(eid dbmodels.EID) error {
