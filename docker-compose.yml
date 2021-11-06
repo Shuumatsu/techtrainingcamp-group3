@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    build: ./db
+    build: ./db/sql/script
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123456
@@ -22,4 +22,5 @@ services:
     restart: always
     environment:
       DB_HOST: mysql
+      DB_PASSWD: 123456
       REDIS_HOST: redis

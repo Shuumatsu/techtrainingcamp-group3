@@ -156,22 +156,22 @@ func TestFindEnvelopeByEID(t *testing.T) {
 func TestOpenEnvelopeByEID(t *testing.T) {
 	CreateSqlTestData()
 	// exist
-	err := OpenEnvelope(75, 8)
+	_, err := OpenEnvelope(75, 8)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// not exist
-	err = OpenEnvelope(414, 4)
+	_, err = OpenEnvelope(414, 4)
 	if err != Error.NotFound {
 		t.Fatal(err)
 	}
 	// error owner
-	err = OpenEnvelope(40, 1)
+	_, err = OpenEnvelope(40, 1)
 	if err != Error.ErrorEnvelopeOwner {
 		t.Fatal(err)
 	}
 	// already open
-	err = OpenEnvelope(75, 8)
+	_, err = OpenEnvelope(75, 8)
 	if err != Error.EnvelopeAlreadyOpen {
 		t.Fatal(err)
 	}
