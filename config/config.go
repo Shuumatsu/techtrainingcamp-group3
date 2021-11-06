@@ -1,9 +1,10 @@
 package config
 
 import (
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/philandstuff/dhall-golang/v6"
-	"os"
 )
 
 const (
@@ -34,6 +35,9 @@ type Environment struct {
 	RedisHost   string
 	RedisPort   string
 
+	KafkaHost string
+	KafkaPort string
+
 	GinMode string
 
 	LogLevel string
@@ -60,6 +64,9 @@ func init() {
 		RedisPasswd: os.Getenv("REDIS_PASSWD"),
 		RedisHost:   os.Getenv("REDIS_HOST"),
 		RedisPort:   os.Getenv("REDIS_PORT"),
+
+		KafkaHost: os.Getenv("KAFKA_HOST"),
+		KafkaPort: os.Getenv("KAFKA_PORT"),
 
 		GinMode: os.Getenv("GIN_MODE"),
 

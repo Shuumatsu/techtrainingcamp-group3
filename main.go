@@ -7,6 +7,7 @@ import (
 	"techtrainingcamp-group3/config"
 	_ "techtrainingcamp-group3/db/rds"
 	_ "techtrainingcamp-group3/db/sql"
+	_ "techtrainingcamp-group3/db/kfk"
 	"techtrainingcamp-group3/logger"
 
 	"github.com/gin-gonic/gin"
