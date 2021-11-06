@@ -10,6 +10,7 @@ const (
 	ErrorEnvelopeOwner
 	DataBaseError
 	SnatchLimit
+	SnatchFailure
 	NotDefined
 )
 
@@ -29,6 +30,8 @@ func (e ErrorCode) Message() string {
 		return "the database error"
 	case SnatchLimit:
 		return "snatch limit"
+	case SnatchFailure:
+		return "snatch failure"
 	default:
 		return "not defined"
 	}

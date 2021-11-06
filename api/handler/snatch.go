@@ -10,7 +10,6 @@ import (
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 	"techtrainingcamp-group3/tools"
-	"time"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -23,8 +22,8 @@ func SnatchHandler(c *gin.Context) {
 	}
 	if rand.Float32() > config.SnatchProb {
 		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "fail",
+			"code": models.SnatchFailure,
+			"msg":  models.SnatchFailure.Message(),
 		})
 	} else {
 		max_count := config.MaxSnatchAmount
@@ -44,14 +43,8 @@ func SnatchHandler(c *gin.Context) {
 			})
 			return
 		}
-		envelope := tools.REPool.Snatch()
-		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), dbmodels.Envelope{
-			EnvelopeId: dbmodels.EID(envelope.Eid),
-			Uid:        user.Uid,
-			Opened:     false,
-			Value:      uint64(envelope.Money),
-			SnatchTime: time.Now().Unix(),
-		})
+		envelope := tools.GetRandEnvelope(user.Uid)
+		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), envelope)
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": models.DataBaseError,
@@ -64,7 +57,7 @@ func SnatchHandler(c *gin.Context) {
 			"code": models.Success,
 			"msg":  models.Success.Message(),
 			"data": gin.H{
-				"envelope_id": envelope.Eid,
+				"envelope_id": envelope.EnvelopeId,
 				"max_count":   max_count,
 				"cur_count":   len(envelopesId) + 1,
 			},

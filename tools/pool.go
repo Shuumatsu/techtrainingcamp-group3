@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"techtrainingcamp-group3/config"
 	"time"
+	"techtrainingcamp-group3/db/dbmodels"
 )
 
 type UnopenedRedEnvelope struct {
@@ -19,7 +20,7 @@ type Pool struct {
 	set   []reflect.SelectCase
 }
 
-var REPool Pool
+// var REPool Pool
 
 func (p *Pool) Work(id int, money int, amount int) {
 	snowflake.SetMachineID(uint16(id))
@@ -75,7 +76,19 @@ func NewPool() Pool {
 	return Pool{channels, set}
 }
 
+func GetRandEnvelope(uid dbmodels.UID) dbmodels.Envelope {
+	mean := float64(config.TotalMoney) / float64(config.TotalAmount)
+	stdDev := math.Min(float64(config.MaxMoney)-mean, mean-float64(config.MinMoney)) / 3
+	value := uint64(rand.NormFloat64()*stdDev + mean)
+	if value > config.MaxMoney{
+		value = config.MaxMoney
+	}
+	if value < config.MinMoney {
+		value = config.MinMoney
+	}
+	return dbmodels.Envelope{dbmodels.EID(snowflake.ID()), uid, false, value, time.Now().Unix()}
+}
+
 func init() {
-	REPool = NewPool()
-	REPool.Start()
+	snowflake.SetStartTime(time.Date(2021, 11, 1, 0, 0, 0, 0, time.UTC))
 }
