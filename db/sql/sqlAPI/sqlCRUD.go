@@ -6,6 +6,7 @@ import (
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql"
 	"techtrainingcamp-group3/logger"
+	"time"
 )
 
 // FindOrCreateUserByUID
@@ -156,12 +157,12 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error
 	if envelope.Opened == true {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return nil, Error.EnvelopeAlreadyOpen
+		return nil, dbmodels.Error.EnvelopeAlreadyOpen
 	}
 	if envelope.Uid != uid {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return nil, Error.ErrorEnvelopeOwner
+		return nil, dbmodels.Error.ErrorEnvelopeOwner
 	}
 	// set envelope open
 	if err := tx.Model(
@@ -187,4 +188,82 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error
 		return nil, err
 	}
 	return envelope, nil
+}
+
+// GetEnvelopeByUidEid
+//	param:
+//		eid > 0
+//		uid > 0
+//	return:
+//		If cannot find eid in sql : Error.Notfound
+//		else if the envelope's owner is not the param-uid: dbmodels.Error.ErrorEnvelopeOwner
+func FindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope,error) {
+	var envelope dbmodels.Envelope
+	//get envelope according to envelope_id
+	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).First(&envelope, eid).Error; err != nil {
+		logger.Sugar.Warnw("GetEnvelope can not find envelope ", "envelope_id", eid)
+		return nil,Error.NotFound
+	}
+	//check if user_id is right
+	if envelope.Uid != uid {
+		logger.Sugar.Warnw("GetEnvelope envelope_id and user_id mismatch ", "envelope_id", eid, "user_id", uid)
+		return nil,dbmodels.Error.ErrorEnvelopeOwner
+	}
+
+	return &envelope,nil
+}
+
+// UpdateEnvelopeOpen
+// param:
+//		p *dbmodels.Envelope != nil
+//		u *dbmodels.User != nil
+// return:
+//		if success : nil
+//      if fail : database error
+// update the envelope opened from false to true and add the envelope's value to user amount
+func UpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User,error) {
+	//update envelope's opened and snatchtime
+	tx := sql.DB.Begin()
+
+	var user 	  dbmodels.User
+	var envelope  dbmodels.Envelope
+	user.Uid = p.Uid
+	envelope.EnvelopeId = p.EnvelopeId
+
+	//find envelope status
+	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope).Error; err != nil {
+		logger.Sugar.Errorw("Find Envelope By EID", "error", err)
+		tx.Rollback()
+		return nil,err
+	}
+
+	//check open status for data consistency
+	if envelope.Opened == true{
+		tx.Rollback()
+		return nil,dbmodels.Error.EnvelopeAlreadyOpen
+	}
+
+	//update envelope status to true
+	if err := tx.Table(dbmodels.Envelope{}.TableName()).Model(p).Updates(dbmodels.Envelope{Opened: true, SnatchTime: time.Now().Unix()}).Error; err != nil {
+		logger.Sugar.Errorw("SqlUpdateEnvelopeOpen fail", "envelope_id", p.EnvelopeId)
+		tx.Rollback()
+		return nil,err
+	}
+
+	//find user amount to get amount
+	if err := sql.DB.Table(dbmodels.User{}.TableName()).Take(&user).Error; err != nil {
+		logger.Sugar.Errorw("FindUserByUID", "error", err)
+		tx.Rollback()
+		return nil,err
+	}
+
+	//update user's amount added to envelope's value
+	amountAfter := user.Amount + uint64(p.Value)
+	if err := tx.Table(dbmodels.User{}.TableName()).Model(&user).Update("amount", amountAfter).Error; err != nil {
+		logger.Sugar.Errorw("SqlUpdate User:amount fail", "uid", p.Uid)
+		tx.Rollback()
+		return nil,err
+	}
+	tx.Commit()
+	return &user,nil
 }

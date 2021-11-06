@@ -13,8 +13,8 @@ import (
 // key: uid, value: user, expiration: 过期时间
 //
 // 设置不成功返回error
-func SetUserByUID(user dbmodels.User, expiration time.Duration) error {
-	err := rds.DB.Set(user.Uid.Key(), user, expiration).Err()
+func SetUserByUID(user *dbmodels.User, expiration time.Duration) error {
+	err := rds.DB.Set(user.Uid.Key(), *user, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set user by uid", "error", err)
 		return err
@@ -44,8 +44,8 @@ func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
 // key: envelopeId, value: envelope, expiration: 过期时间
 //
 // 设置不成功返回error
-func SetEnvelopeByEID(envelope dbmodels.Envelope, expiration time.Duration) error {
-	err := rds.DB.Set(envelope.EnvelopeId.Key(), envelope, expiration).Err()
+func SetEnvelopeByEID(envelope *dbmodels.Envelope, expiration time.Duration) error {
+	err := rds.DB.Set(envelope.EnvelopeId.Key(), *envelope, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set envelope by eid", "error", err)
 		return err
@@ -67,5 +67,23 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 		}
 		return nil, err
 	}
+	return &envelope, nil
+}
+// FindEnvelopeByEIDUID
+//
+//
+func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
+	var envelope dbmodels.Envelope
+	err := rds.DB.Get(eid.Key()).Scan(&envelope)
+	if err != nil {
+		if err == redis.Nil {
+			return nil, Error.NotFound
+		}
+		return nil, err
+	}
+	if envelope.Uid != uid {
+		return nil, dbmodels.Error.ErrorEnvelopeOwner
+	}
+
 	return &envelope, nil
 }
