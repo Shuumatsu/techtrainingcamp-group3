@@ -2,14 +2,14 @@ package handler
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
-
-	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func ConstructErrorReply(c *gin.Context,e models.ErrorCode) {
@@ -44,7 +44,7 @@ func OpenHandler(c *gin.Context) {
 
 	//First find envelope by redis
 	envelopeP,err = redisAPI.FindEnvelopeByEIDUID(dbmodels.EID(req.EnvelopeId),dbmodels.UID(req.Uid))
-	//If not found check the sql database
+	//If cache miss search in sql
 	if err != nil{
 		envelopeP, err = sqlAPI.FindEnvelopeByUidEid(dbmodels.EID(req.EnvelopeId), dbmodels.UID(req.Uid))
 		if errors.Is(err, sqlAPI.Error.NotFound) {
@@ -74,7 +74,7 @@ func OpenHandler(c *gin.Context) {
 
 	// Update envelope status in redis to prevent open twice
 	envelopeP.Opened = true
-	if err := redisAPI.SetEnvelopeByEID(envelopeP,30); err != nil{
+	if err := redisAPI.SetEnvelopeByEID(envelopeP,300*time.Second); err != nil{
 		logger.Sugar.Errorw("Redis set envelop opened error","envelope_id", req.EnvelopeId, "uid", req.Uid)
 	}
 
@@ -96,7 +96,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	//If data success flush user to redis
-	if err := redisAPI.SetUserByUID(userP,30);err != nil{
+	if err := redisAPI.SetUserByUID(userP,300*time.Second);err != nil{
 		logger.Sugar.Errorw("Redis set user error","uid",userP.Uid)
 	}
 
