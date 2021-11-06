@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"techtrainingcamp-group3/config"
+	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/logger"
 )
 
@@ -29,4 +30,16 @@ func init() {
 	}
 	DB = db
 	logger.Sugar.Debugw("mysql init", "mysql config", dsn)
+	if !db.Migrator().HasTable(&dbmodels.User{}) {
+		err = DB.AutoMigrate(&dbmodels.User{})
+		if err != nil {
+			panic(err)
+		}
+	}
+	if !db.Migrator().HasTable(&dbmodels.Envelope{}) {
+		err = DB.AutoMigrate(&dbmodels.Envelope{})
+		if err != nil {
+			panic(err)
+		}
+	}
 }
