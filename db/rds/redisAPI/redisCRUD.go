@@ -69,9 +69,9 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	}
 	return &envelope, nil
 }
+
 // FindEnvelopeByEIDUID
-//
-//
+//	find the envelope and check the envelope owner
 func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
 	err := rds.DB.Get(eid.Key()).Scan(&envelope)

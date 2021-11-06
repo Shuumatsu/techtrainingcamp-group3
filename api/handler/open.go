@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func ConstructErrorReply(c *gin.Context,e models.ErrorCode) {
+func ConstructErrorReply(c *gin.Context, e models.ErrorCode) {
 	c.JSON(200, gin.H{
 		"code": e,
 		"msg":  e.Message(),
@@ -23,7 +23,7 @@ func ConstructErrorReply(c *gin.Context,e models.ErrorCode) {
 }
 
 func checkOpen(p *dbmodels.Envelope) error {
-	if p.Opened == true{
+	if p.Opened == true {
 		return dbmodels.Error.EnvelopeAlreadyOpen
 	}
 	return nil
@@ -42,62 +42,62 @@ func OpenHandler(c *gin.Context) {
 
 	var envelopeP *dbmodels.Envelope = nil
 
-	//First find envelope by redis
-	envelopeP,err = redisAPI.FindEnvelopeByEIDUID(dbmodels.EID(req.EnvelopeId),dbmodels.UID(req.Uid))
-	//If cache miss search in sql
-	if err != nil{
+	// First find envelope by redis
+	envelopeP, err = redisAPI.FindEnvelopeByEIDUID(dbmodels.EID(req.EnvelopeId), dbmodels.UID(req.Uid))
+	// If cache miss search in sql
+	if err != nil {
 		envelopeP, err = sqlAPI.FindEnvelopeByUidEid(dbmodels.EID(req.EnvelopeId), dbmodels.UID(req.Uid))
 		if errors.Is(err, sqlAPI.Error.NotFound) {
-			ConstructErrorReply(c,models.NotFound)
+			ConstructErrorReply(c, models.NotFound)
 			return
 		}
 	}
 
 	// check if the owner is right
 	if errors.Is(err, dbmodels.Error.ErrorEnvelopeOwner) {
-		ConstructErrorReply(c,models.ErrorEnvelopeOwner)
+		ConstructErrorReply(c, models.ErrorEnvelopeOwner)
 		return
 	}
 
 	// check if there is unknown error
-	if err != nil || envelopeP == nil{
-		ConstructErrorReply(c,models.NotDefined)
+	if err != nil || envelopeP == nil {
+		ConstructErrorReply(c, models.NotDefined)
 		return
 	}
 
-	//Check if the envelope has already been opened
+	// Check if the envelope has already been opened
 	err = checkOpen(envelopeP)
 	if errors.Is(err, dbmodels.Error.EnvelopeAlreadyOpen) {
-		ConstructErrorReply(c,models.EnvelopeAlreadyOpen)
+		ConstructErrorReply(c, models.EnvelopeAlreadyOpen)
 		return
 	}
 
 	// Update envelope status in redis to prevent open twice
 	envelopeP.Opened = true
-	if err := redisAPI.SetEnvelopeByEID(envelopeP,300*time.Second); err != nil{
-		logger.Sugar.Errorw("Redis set envelop opened error","envelope_id", req.EnvelopeId, "uid", req.Uid)
+	if err := redisAPI.SetEnvelopeByEID(envelopeP, 300*time.Second); err != nil {
+		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", req.EnvelopeId, "uid", req.Uid)
 	}
 
-	//To Do: add mq to update data in sql
+	// To Do: add mq to update data in sql
 
 	// Update envelope status and user amount in sql
 	userP, err := sqlAPI.UpdateEnvelopeOpen(envelopeP)
 
-	//check for envelope status again
+	// check for envelope status again
 	if errors.Is(err, dbmodels.Error.EnvelopeAlreadyOpen) {
-		ConstructErrorReply(c,models.EnvelopeAlreadyOpen)
+		ConstructErrorReply(c, models.EnvelopeAlreadyOpen)
 		return
 	}
 
-	//If error happened, return false
-	if err != nil{
-		ConstructErrorReply(c,models.DataBaseError)
+	// If error happened, return false
+	if err != nil {
+		ConstructErrorReply(c, models.DataBaseError)
 		return
 	}
 
-	//If data success flush user to redis
-	if err := redisAPI.SetUserByUID(userP,300*time.Second);err != nil{
-		logger.Sugar.Errorw("Redis set user error","uid",userP.Uid)
+	// If data success flush user to redis
+	if err := redisAPI.SetUserByUID(userP, 300*time.Second); err != nil {
+		logger.Sugar.Errorw("Redis set user error", "uid", userP.Uid)
 	}
 
 	// Update envelope status and user amount success
@@ -109,4 +109,3 @@ func OpenHandler(c *gin.Context) {
 		},
 	})
 }
-
