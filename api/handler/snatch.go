@@ -28,19 +28,19 @@ func SnatchHandler(c *gin.Context) {
 		})
 	} else {
 		max_count := config.MaxSnatchAmount
-		user, err := sqlAPI.FindOrCreateUserByUID(dbmodels.UID(req.Uid))
+		user, err := sqlAPI.FindOrCreateUserByUID(dbmodels.User{Uid: dbmodels.UID(req.Uid)})
 		if err != nil {
 			c.JSON(200, gin.H{
-				"code": 3,
-				"msg":  "database error",
+				"code": models.DataBaseError,
+				"msg":  models.DataBaseError.Message(),
 			})
 			return
 		}
 		envelopesId, err := sqlAPI.ParseEnvelopeList(user.EnvelopeList)
 		if len(envelopesId) >= max_count {
 			c.JSON(200, gin.H{
-				"code": 2,
-				"msg":  "too many envelopes",
+				"code": models.SnatchLimit,
+				"msg":  models.SnatchLimit.Message(),
 			})
 			return
 		}
@@ -54,15 +54,15 @@ func SnatchHandler(c *gin.Context) {
 		})
 		if err != nil {
 			c.JSON(200, gin.H{
-				"code": 3,
-				"msg":  "database error",
+				"code": models.DataBaseError,
+				"msg":  models.DataBaseError.Message(),
 			})
 			return
 		}
 		// TODO: redis
 		c.JSON(200, gin.H{
-			"code": 0,
-			"msg":  "success",
+			"code": models.Success,
+			"msg":  models.Success.Message(),
 			"data": gin.H{
 				"envelope_id": envelope.Eid,
 				"max_count":   max_count,

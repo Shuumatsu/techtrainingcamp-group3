@@ -6,6 +6,10 @@ const (
 	Success ErrorCode = iota
 	NotFound
 	ParseError
+	EnvelopeAlreadyOpen
+	ErrorEnvelopeOwner
+	DataBaseError
+	SnatchLimit
 	NotDefined
 )
 
@@ -17,6 +21,14 @@ func (e ErrorCode) Message() string {
 		return "not found"
 	case ParseError:
 		return "the envelope list parse error"
+	case EnvelopeAlreadyOpen:
+		return "the envelope already open"
+	case ErrorEnvelopeOwner:
+		return "the envelope not belong to this user"
+	case DataBaseError:
+		return "the database error"
+	case SnatchLimit:
+		return "snatch limit"
 	default:
 		return "not defined"
 	}

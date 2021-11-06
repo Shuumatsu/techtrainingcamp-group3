@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -18,10 +19,10 @@ func WalletListHandler(c *gin.Context) {
 	// TODO: mysql
 	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	// if mysql not found
-	if err == sqlAPI.Error.FuncNotDefined {
+	if errors.Is(err, sqlAPI.Error.NotFound) {
 		c.JSON(200, models.WalletListResp{
-			Code: models.NotDefined,
-			Msg:  models.NotDefined.Message(),
+			Code: models.NotFound,
+			Msg:  models.NotFound.Message(),
 			Data: models.WalletListData{},
 		})
 		logger.Sugar.Debugw("WalletListHandler",
@@ -30,10 +31,10 @@ func WalletListHandler(c *gin.Context) {
 	}
 	// find envelopes which belong to the user
 	envelopes, err := sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
-	if err == sqlAPI.Error.FuncNotDefined {
+	if err != nil {
 		c.JSON(200, models.WalletListResp{
-			Code: models.NotDefined,
-			Msg:  models.NotDefined.Message(),
+			Code: models.DataBaseError,
+			Msg:  models.DataBaseError.Message(),
 			Data: models.WalletListData{},
 		})
 		logger.Sugar.Debugw("WalletListHandler",

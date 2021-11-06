@@ -1,39 +1,15 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
+	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 
 	"github.com/gin-gonic/gin"
 )
-
-type openCode int
-
-const (
-	Success        openCode = iota //success
-	Opened                         // Already opened
-	NoExist                        // The specified user_id and envelope_id doesn't exist
-	NoUser                         // The specified user doesn't exist in user table
-	UnknownFailure                 //UnknownFailure
-)
-
-func (c openCode) String() string {
-	switch c {
-	case Success:
-		return "success"
-	case Opened:
-		return "opened"
-	case NoExist:
-		return "noExist"
-	case NoUser:
-		return "noUser"
-	case UnknownFailure:
-		return "unknownFailure"
-	}
-	return "N/A"
-}
 
 func OpenHandler(c *gin.Context) {
 	var req models.OpenReq
@@ -46,12 +22,12 @@ func OpenHandler(c *gin.Context) {
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 
-	//get envelope by envelope_id and user_id
-	envelopeP := sqlAPI.GetEnvelope(req.EnvelopeId, uint64(req.Uid))
-	if envelopeP == nil {
+	// open envelope by envelope_id and user_id
+	envelopeP, err := sqlAPI.OpenEnvelope(dbmodels.EID(req.EnvelopeId), dbmodels.UID(req.Uid))
+	if errors.Is(err, sqlAPI.Error.NotFound) {
 		c.JSON(200, gin.H{
-			"code": NoExist,
-			"msg":  NoExist.String(),
+			"code": models.NotFound,
+			"msg":  models.NotFound.Message(),
 			"data": gin.H{
 				"value": 0,
 			},
@@ -59,12 +35,11 @@ func OpenHandler(c *gin.Context) {
 		return
 	}
 
-	//get user by user_id
-	userP := sqlAPI.GetUser(uint64(req.Uid))
-	if userP == nil {
+	// check the owner
+	if errors.Is(err, sqlAPI.Error.ErrorEnvelopeOwner) {
 		c.JSON(200, gin.H{
-			"code": NoUser,
-			"msg":  NoUser.String(),
+			"code": models.ErrorEnvelopeOwner,
+			"msg":  models.ErrorEnvelopeOwner.Message(),
 			"data": gin.H{
 				"value": 0,
 			},
@@ -72,11 +47,11 @@ func OpenHandler(c *gin.Context) {
 		return
 	}
 
-	//The envelope has already been opened
-	if envelopeP.Open_stat == true {
+	// The envelope has already been opened
+	if errors.Is(err, sqlAPI.Error.EnvelopeAlreadyOpen) {
 		c.JSON(200, gin.H{
-			"code": Opened,
-			"msg":  Opened.String(),
+			"code": models.EnvelopeAlreadyOpen,
+			"msg":  models.EnvelopeAlreadyOpen.Message(),
 			"data": gin.H{
 				"value": 0,
 			},
@@ -84,16 +59,10 @@ func OpenHandler(c *gin.Context) {
 		return
 	}
 
-	//Update envelope status and user amount
-	if err = sqlAPI.UpdateEnvelopeOpen(envelopeP, userP); err != nil {
-		logger.Sugar.Errorw("OpenHandler update error")
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
-		return
-	}
-
+	// Update envelope status and user amount success
 	c.JSON(200, gin.H{
-		"code": Success,
-		"msg":  Success.String(),
+		"code": models.Success,
+		"msg":  models.Success.Message(),
 		"data": gin.H{
 			"value": envelopeP.Value,
 		},

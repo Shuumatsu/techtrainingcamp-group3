@@ -134,11 +134,11 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 //		else if the envelope is already open: return Error.EnvelopeAlreadyOpen
 //		else if the envelope's owner is not the param-uid: return Error.ErrorEnvelopeOwner
 //		else if sql error: return other database error
-//		else return nil
+//		else return the envelope
 // update the envelope open and add the envelope's value to user amount
-func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) error {
+func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	if eid == 0 || uid == 0 {
-		return Error.ErrorParam
+		return nil, Error.ErrorParam
 	}
 	tx := sql.DB.Begin()
 	defer func() {
@@ -151,24 +151,24 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) error {
 	if err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 	if envelope.Opened == true {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return Error.EnvelopeAlreadyOpen
+		return nil, Error.EnvelopeAlreadyOpen
 	}
 	if envelope.Uid != uid {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return Error.ErrorEnvelopeOwner
+		return nil, Error.ErrorEnvelopeOwner
 	}
 	// set envelope open
 	if err := tx.Model(
 		&envelope).Update("opened", true).Error; err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 	logger.Sugar.Debugw("OpenEnvelopeByEID", "envelope", envelope)
 	// add user amount
@@ -179,7 +179,12 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) error {
 			"amount + ?", envelope.Value)).Error; err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
-		return err
+		return nil, err
 	}
-	return tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+		tx.Rollback()
+		return nil, err
+	}
+	return envelope, nil
 }
