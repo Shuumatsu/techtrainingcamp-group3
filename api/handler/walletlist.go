@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -19,7 +18,7 @@ func WalletListHandler(c *gin.Context) {
 	// TODO: mysql
 	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	// if mysql error
-	if err != nil && !errors.Is(err, sqlAPI.Error.NotFound) {
+	if err != nil {
 		switch err {
 		case sqlAPI.Error.NotFound:
 			// if mysql not found
