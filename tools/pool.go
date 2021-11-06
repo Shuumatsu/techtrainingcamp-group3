@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"reflect"
 	"techtrainingcamp-group3/config"
-	"time"
 	"techtrainingcamp-group3/db/dbmodels"
+	"time"
 )
 
 type UnopenedRedEnvelope struct {
@@ -80,13 +80,18 @@ func GetRandEnvelope(uid dbmodels.UID) dbmodels.Envelope {
 	mean := float64(config.TotalMoney) / float64(config.TotalAmount)
 	stdDev := math.Min(float64(config.MaxMoney)-mean, mean-float64(config.MinMoney)) / 3
 	value := uint64(rand.NormFloat64()*stdDev + mean)
-	if value > config.MaxMoney{
+	if value > config.MaxMoney {
 		value = config.MaxMoney
 	}
 	if value < config.MinMoney {
 		value = config.MinMoney
 	}
-	return dbmodels.Envelope{dbmodels.EID(snowflake.ID()), uid, false, value, time.Now().Unix()}
+	return dbmodels.Envelope{
+		EnvelopeId: dbmodels.EID(snowflake.ID()),
+		Uid:        uid,
+		Value:      value,
+		SnatchTime: time.Now().Unix(),
+	}
 }
 
 func init() {

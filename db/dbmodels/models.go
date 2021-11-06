@@ -25,7 +25,7 @@ func (e EID) String() string {
 }
 
 type User struct {
-	Uid          UID       `gorm:"column:uid; PRIMARY_KEY" json:"uid"`
+	Uid          UID       `gorm:"column:uid; PRIMARY_KEY; uniqueIndex" json:"uid"`
 	Amount       uint64    `gorm:"column:amount" json:"amount"`
 	EnvelopeList string    `gorm:"column:envelope_list" json:"envelope_list"`
 	UpdatedAt    time.Time `gorm:"column:updated_at" json:"updated_at"`
@@ -42,8 +42,8 @@ func (u *User) UnmarshalBinary(data []byte) error {
 }
 
 type Envelope struct {
-	EnvelopeId EID    `gorm:"column:envelope_id; PRIMARY_KEY" json:"envelope_id"`
-	Uid        UID    `gorm:"column:uid" json:"uid"`
+	EnvelopeId EID    `gorm:"column:envelope_id; PRIMARY_KEY; uniqueIndex" json:"envelope_id"`
+	Uid        UID    `gorm:"column:uid; index:uid" json:"uid"`
 	Opened     bool   `gorm:"column:opened" json:"opened"`
 	Value      uint64 `gorm:"column:value" json:"value"`
 	SnatchTime int64  `gorm:"column:snatch_time" json:"snatch_time"`

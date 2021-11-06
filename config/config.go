@@ -31,14 +31,15 @@ type Environment struct {
 	DBPort   string
 	DBName   string
 
-	RedisPasswd string
-	RedisHost   string
-	RedisPort   string
+	RedisPasswd   string
+	RedisHost     string
+	RedisPort     string
+	RedisPoolSize string
 
 	KafkaHost string
 	KafkaPort string
-
-	GinMode string
+	
+	GinMode       string
 
 	LogLevel string
 }
@@ -61,9 +62,10 @@ func init() {
 		DBPort:   os.Getenv("DB_PORT"),
 		DBName:   os.Getenv("DB_NAME"),
 
-		RedisPasswd: os.Getenv("REDIS_PASSWD"),
-		RedisHost:   os.Getenv("REDIS_HOST"),
-		RedisPort:   os.Getenv("REDIS_PORT"),
+		RedisPasswd:   os.Getenv("REDIS_PASSWD"),
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPort:     os.Getenv("REDIS_PORT"),
+		RedisPoolSize: os.Getenv("REDIS_POOLSIZE"),
 
 		KafkaHost: os.Getenv("KAFKA_HOST"),
 		KafkaPort: os.Getenv("KAFKA_PORT"),
