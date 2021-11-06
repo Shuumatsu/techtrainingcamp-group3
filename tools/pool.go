@@ -1,12 +1,12 @@
 package tools
 
 import (
+	"github.com/godruoyi/go-snowflake"
 	"math"
 	"math/rand"
 	"reflect"
 	"techtrainingcamp-group3/config"
 	"time"
-	"github.com/godruoyi/go-snowflake"
 )
 
 type UnopenedRedEnvelope struct {
@@ -61,11 +61,11 @@ func (p *Pool) Start() {
 
 func NewPool() Pool {
 	rand.Seed(time.Now().UnixNano())
-	channels := []chan UnopenedRedEnvelope{}
+	channels := make([]chan UnopenedRedEnvelope, 0)
 	for i := 0; i < config.PoolWorkerNUM; i++ {
 		channels = append(channels, make(chan UnopenedRedEnvelope, config.PoolCapacity))
 	}
-	set := []reflect.SelectCase{}
+	set := make([]reflect.SelectCase, 0)
 	for _, ch := range channels {
 		set = append(set, reflect.SelectCase{
 			Dir:  reflect.SelectRecv,

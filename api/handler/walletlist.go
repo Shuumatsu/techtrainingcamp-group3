@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -18,15 +17,27 @@ func WalletListHandler(c *gin.Context) {
 
 	// TODO: mysql
 	user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
-	// if mysql not found
-	if errors.Is(err, sqlAPI.Error.NotFound) {
-		c.JSON(200, models.WalletListResp{
-			Code: models.NotFound,
-			Msg:  models.NotFound.Message(),
-			Data: models.WalletListData{},
-		})
-		logger.Sugar.Debugw("WalletListHandler",
-			"not found in mysql", err)
+	// if mysql error
+	if err != nil {
+		switch err {
+		case sqlAPI.Error.NotFound:
+			// if mysql not found
+			c.JSON(200, models.WalletListResp{
+				Code: models.NotFound,
+				Msg:  models.NotFound.Message(),
+				Data: models.WalletListData{},
+			})
+			logger.Sugar.Debugw("WalletListHandler",
+				"not found in mysql", err)
+		default:
+			c.JSON(200, models.WalletListResp{
+				Code: models.DataBaseError,
+				Msg:  models.DataBaseError.Message(),
+				Data: models.WalletListData{},
+			})
+			logger.Sugar.Debugw("WalletListHandler",
+				"mysql database error", err)
+		}
 		return
 	}
 	// find envelopes which belong to the user

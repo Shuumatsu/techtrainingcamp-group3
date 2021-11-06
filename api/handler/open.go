@@ -100,6 +100,7 @@ func OpenHandler(c *gin.Context) {
 		logger.Sugar.Errorw("Redis set user error","uid",userP.Uid)
 	}
 
+	// Update envelope status and user amount success
 	c.JSON(200, gin.H{
 		"code": models.Success,
 		"msg":  models.Success.Message(),
