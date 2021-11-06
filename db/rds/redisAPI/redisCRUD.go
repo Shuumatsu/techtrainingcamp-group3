@@ -69,3 +69,14 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	}
 	return &envelope, nil
 }
+
+func FindWalletByUID(uid dbmodels.UID) (amount uint64, envelopes []dbmodels.Envelope, err error) {
+	pipe := rds.DB.TxPipeline()
+	// 执行事务
+	var user dbmodels.User
+	err = pipe.Get(uid.Key()).Scan(&user)
+	if err != nil {
+		return 0, nil, err
+	}
+	return 0, nil, Error.FuncNotDefined
+}
