@@ -84,6 +84,5 @@ func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 	if envelope.Uid != uid {
 		return nil, dbmodels.Error.ErrorEnvelopeOwner
 	}
-
 	return &envelope, nil
 }
