@@ -1,9 +1,9 @@
 package kfk
 
 import (
+	"github.com/Shopify/sarama"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/logger"
-	"github.com/Shopify/sarama"
 )
 
 func init() {
