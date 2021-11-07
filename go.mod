@@ -11,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/philandstuff/dhall-golang/v6 v6.0.2
 	go.uber.org/zap v1.19.1
+	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	gorm.io/driver/mysql v1.1.3
 	gorm.io/gorm v1.22.2
 )
@@ -52,6 +53,5 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

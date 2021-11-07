@@ -1,10 +1,12 @@
 package sqlAPI
 
 import (
+	"context"
 	"fmt"
 	"gorm.io/gorm"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/sql"
+	"techtrainingcamp-group3/db/tokenBucket"
 	"techtrainingcamp-group3/logger"
 	"time"
 )
@@ -21,6 +23,13 @@ func FindOrCreateUserByUID(defaultUser dbmodels.User) (*dbmodels.User, error) {
 	if defaultUser.Uid == 0 {
 		return nil, Error.ErrorParam
 	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doFindOrCreateUserByUID(defaultUser)
+}
+func doFindOrCreateUserByUID(defaultUser dbmodels.User) (*dbmodels.User, error) {
 	if err := sql.DB.Table(
 		dbmodels.User{}.TableName()).FirstOrCreate(
 		&defaultUser).Error; err != nil {
@@ -40,7 +49,14 @@ func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
 	if uid == 0 {
 		return nil, Error.ErrorParam
 	}
-	var user dbmodels.User
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doFindUserByUID(uid)
+}
+func doFindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
+	user := dbmodels.User{Uid: uid}
 	if err := sql.DB.Table(
 		dbmodels.User{}.TableName()).Take(
 		&user).Error; err != nil {
@@ -60,6 +76,13 @@ func FindEnvelopesByUID(uid dbmodels.UID) ([]dbmodels.Envelope, error) {
 	if uid == 0 {
 		return nil, Error.ErrorParam
 	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doFindEnvelopesByUID(uid)
+}
+func doFindEnvelopesByUID(uid dbmodels.UID) ([]dbmodels.Envelope, error) {
 	var Envelopes []dbmodels.Envelope
 	if err := sql.DB.Table(
 		dbmodels.Envelope{}.TableName()).Where(
@@ -81,6 +104,13 @@ func AddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error 
 	if uid == 0 || envelope.EnvelopeId == 0 {
 		return Error.ErrorParam
 	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return err
+	}
+	return doAddEnvelopeToUserByUID(uid, envelope)
+}
+func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error {
 	tx := sql.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -116,6 +146,13 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	if eid == 0 {
 		return nil, Error.ErrorParam
 	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doFindEnvelopeByEID(eid)
+}
+func doFindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	envelope := dbmodels.Envelope{EnvelopeId: eid}
 	if err := sql.DB.Table(
 		dbmodels.Envelope{}.TableName()).Take(
@@ -141,6 +178,13 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error
 	if eid == 0 || uid == 0 {
 		return nil, Error.ErrorParam
 	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doOpenEnvelope(eid, uid)
+}
+func doOpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	tx := sql.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -198,6 +242,16 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error
 //		If cannot find eid in sql : Error.Notfound
 //		else if the envelope's owner is not the param-uid: dbmodels.Error.ErrorEnvelopeOwner
 func FindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
+	if eid == 0 || uid == 0 {
+		return nil, Error.ErrorParam
+	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doFindEnvelopeByUidEid(eid, uid)
+}
+func doFindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
 	// get envelope according to envelope_id
 	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).First(&envelope, eid).Error; err != nil {
@@ -209,7 +263,6 @@ func FindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 		logger.Sugar.Warnw("GetEnvelope envelope_id and user_id mismatch ", "envelope_id", eid, "user_id", uid)
 		return nil, dbmodels.Error.ErrorEnvelopeOwner
 	}
-
 	return &envelope, nil
 }
 
@@ -222,9 +275,23 @@ func FindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 //      if fail : database error
 // update the envelope opened from false to true and add the envelope's value to user amount
 func UpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
+	if p.EnvelopeId == 0 || p.Uid == 0 {
+		return nil, Error.ErrorParam
+	}
+	err := tokenBucket.Limiter.Wait(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return doUpdateEnvelopeOpen(p)
+}
+func doUpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 	// update envelope's opened and snatchtime
 	tx := sql.DB.Begin()
-
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 	var user dbmodels.User
 	var envelope dbmodels.Envelope
 	user.Uid = p.Uid
@@ -264,6 +331,10 @@ func UpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 		tx.Rollback()
 		return nil, err
 	}
-	tx.Commit()
+	err := tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	return &user, nil
 }
