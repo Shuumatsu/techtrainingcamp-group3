@@ -5,9 +5,9 @@ import (
 	"os"
 	"techtrainingcamp-group3/api/router"
 	"techtrainingcamp-group3/config"
+	_ "techtrainingcamp-group3/db/kfk"
 	_ "techtrainingcamp-group3/db/rds"
 	_ "techtrainingcamp-group3/db/sql"
-	_ "techtrainingcamp-group3/db/kfk"
 	"techtrainingcamp-group3/logger"
 
 	"github.com/gin-gonic/gin"

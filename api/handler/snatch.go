@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/db/dbmodels"
+	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
 	"techtrainingcamp-group3/logger"
 	"techtrainingcamp-group3/models"
 	"techtrainingcamp-group3/tools"
+	"time"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -53,6 +55,15 @@ func SnatchHandler(c *gin.Context) {
 			return
 		}
 		// TODO: redis
+		user.EnvelopeList += "," + envelope.EnvelopeId.String()
+		err = redisAPI.SetUserByUID(user, 300*time.Second)
+		if err != nil {
+			logger.Sugar.Debugw("snatch", "redis set error", err, "user", user)
+		}
+		err = redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second)
+		if err != nil {
+			logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
+		}
 		c.JSON(200, gin.H{
 			"code": models.Success,
 			"msg":  models.Success.Message(),

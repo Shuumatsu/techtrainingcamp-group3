@@ -17,6 +17,7 @@ func WalletListHandler(c *gin.Context) {
 	// TODO: redis
 	user, err := redisAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	if err != nil {
+		logger.Sugar.Debugw("redis not found", "uid", req.Uid)
 		// TODO: mysql
 		// redis缓存未命中
 		user, err = sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
@@ -67,6 +68,7 @@ func WalletListHandler(c *gin.Context) {
 		envelopes = append(envelopes, *envelope)
 	}
 	if len(envelopes) != len(envelopesID) {
+		logger.Sugar.Debugw("redis not found", "envelopes", envelopesID)
 		// TODO:mysql
 		envelopes, err = sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
 		if err != nil {
@@ -86,6 +88,7 @@ func WalletListHandler(c *gin.Context) {
 		envelopesResq[i] = envelopes[i].ToResqModel()
 	}
 	// success
+	logger.Sugar.Debugw("success", "amount", user.Amount, "envelopelist", envelopesResq)
 	c.JSON(200, models.WalletListResp{
 		Code: models.Success,
 		Msg:  models.Success.Message(),
