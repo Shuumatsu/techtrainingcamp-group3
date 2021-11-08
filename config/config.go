@@ -8,14 +8,15 @@ import (
 )
 
 const (
-	TotalMoney      = 20000
+	TotalMoney      = 1e10
 	MaxMoney        = 500
 	MinMoney        = 100
-	TotalAmount     = 100
+	UserAmount      = 6e7
 	SnatchProb      = 0.6
 	PoolCapacity    = 128
 	PoolWorkerNUM   = 10
 	MaxSnatchAmount = 5
+	TotalAmount     = UserAmount * MaxSnatchAmount
 )
 
 type Config struct {

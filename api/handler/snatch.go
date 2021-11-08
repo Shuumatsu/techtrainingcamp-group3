@@ -29,8 +29,15 @@ func SnatchHandler(c *gin.Context) {
 			"msg":  models.SnatchFailure.Message(),
 		})
 	} else {
+		if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+			c.JSON(200, gin.H{
+				"code": models.NotFound,
+				"msg":  models.NotFound.Message(),
+			})
+			return
+		}
 		max_count := config.MaxSnatchAmount
-		user, err := sqlAPI.FindOrCreateUserByUID(dbmodels.User{Uid: dbmodels.UID(req.Uid)})
+		user, err := sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 		if err != nil {
 			c.JSON(200, gin.H{
 				"code": models.DataBaseError,
