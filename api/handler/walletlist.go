@@ -28,7 +28,7 @@ func WalletListHandler(c *gin.Context) {
 			Msg:  models.NotFound.Message(),
 			Data: models.WalletListData{},
 		})
-		logger.Sugar.Debugw("WalletListHandler not found in bloomfilter")
+		logger.Sugar.Debugw("WalletListHandler: user not found in bloomfilter")
 		return
 	}
 	// TODO: redis
