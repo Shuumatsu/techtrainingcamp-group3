@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"techtrainingcamp-group3/db/bloomfilter"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -20,6 +21,16 @@ func WalletListHandler(c *gin.Context) {
 	}
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
+	// TODO: bloom filter
+	if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+		c.JSON(200, models.WalletListResp{
+			Code: models.NotFound,
+			Msg:  models.NotFound.Message(),
+			Data: models.WalletListData{},
+		})
+		logger.Sugar.Debugw("WalletListHandler not found in bloomfilter")
+		return
+	}
 	// TODO: redis
 	user, err := redisAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	if err != nil {

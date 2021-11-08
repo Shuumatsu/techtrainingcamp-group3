@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"techtrainingcamp-group3/config"
+	"techtrainingcamp-group3/db/bloomfilter"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -64,6 +65,10 @@ func SnatchHandler(c *gin.Context) {
 		if err != nil {
 			logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
 		}
+		// TODO: bloom filter
+		bloomfilter.User.AddString(user.Uid.String())
+		bloomfilter.Envelope.AddString(envelope.EnvelopeId.String())
+		logger.Sugar.Debugw("snarch handler", "success", "user", user)
 		c.JSON(200, gin.H{
 			"code": models.Success,
 			"msg":  models.Success.Message(),

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"techtrainingcamp-group3/db/bloomfilter"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -39,7 +40,17 @@ func OpenHandler(c *gin.Context) {
 	}
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
-
+	// TODO:bloom filter
+	if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+		ConstructErrorReply(c, models.NotFound)
+		logger.Sugar.Debugw("openHandler: not found in bloomfilter")
+		return
+	}
+	if bloomfilter.Envelope.TestString(dbmodels.EID(req.EnvelopeId).String()) == false {
+		ConstructErrorReply(c, models.NotFound)
+		logger.Sugar.Debugw("openHandler: not found in bloomfilter")
+		return
+	}
 	var envelopeP *dbmodels.Envelope = nil
 
 	// First find envelope by redis
