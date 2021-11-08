@@ -16,7 +16,7 @@ import (
 
 func SnatchHandler(c *gin.Context) {
 	var req models.SnatchReq
-	err := c.Bind(&req)
+	err := c.BindJSON(&req)
 	if err != nil {
 		logger.Sugar.Errorw("SnatchHandler parameter bind error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

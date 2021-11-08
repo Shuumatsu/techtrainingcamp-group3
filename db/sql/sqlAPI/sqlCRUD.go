@@ -254,7 +254,7 @@ func FindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 func doFindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
 	// get envelope according to envelope_id
-	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).First(&envelope, eid).Error; err != nil {
+	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope, eid).Error; err != nil {
 		logger.Sugar.Warnw("GetEnvelope can not find envelope ", "envelope_id", eid)
 		return nil, Error.NotFound
 	}
@@ -325,7 +325,7 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 	}
 
 	// update user's amount added to envelope's value
-	amountAfter := user.Amount + uint64(p.Value)
+	amountAfter := user.Amount + p.Value
 	if err := tx.Table(dbmodels.User{}.TableName()).Model(&user).Update("amount", amountAfter).Error; err != nil {
 		logger.Sugar.Errorw("SqlUpdate User:amount fail", "uid", p.Uid)
 		tx.Rollback()

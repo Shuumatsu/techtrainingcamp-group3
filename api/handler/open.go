@@ -31,7 +31,7 @@ func checkOpen(p *dbmodels.Envelope) error {
 
 func OpenHandler(c *gin.Context) {
 	var req models.OpenReq
-	err := c.Bind(&req)
+	err := c.BindJSON(&req)
 	if err != nil {
 		logger.Sugar.Errorw("OpenHandler parameter bind error")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -101,6 +101,7 @@ func OpenHandler(c *gin.Context) {
 	}
 
 	// Update envelope status and user amount success
+	logger.Sugar.Debugw("Open Handler success", "envelopeId", envelopeP.EnvelopeId)
 	c.JSON(200, gin.H{
 		"code": models.Success,
 		"msg":  models.Success.Message(),

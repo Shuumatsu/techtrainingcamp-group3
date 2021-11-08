@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds/redisAPI"
 	"techtrainingcamp-group3/db/sql/sqlAPI"
@@ -11,7 +12,12 @@ import (
 
 func WalletListHandler(c *gin.Context) {
 	var req models.WalletListReq
-	c.Bind(&req)
+	err := c.BindJSON(&req)
+	if err != nil {
+		logger.Sugar.Errorw("SnatchHandler parameter bind error")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
 	// TODO: redis
