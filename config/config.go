@@ -38,8 +38,9 @@ type Environment struct {
 	RedisPort     string
 	RedisPoolSize string
 	// kafka config
-	KafkaHost string
-	KafkaPort string
+	KafkaHost   string
+	KafkaPort   string
+	KafkaTopics []string
 	// tokenBucket config
 	TokenInterval string
 	TokenMaxCount string
@@ -74,8 +75,9 @@ func init() {
 		RedisPort:     os.Getenv("REDIS_PORT"),
 		RedisPoolSize: os.Getenv("REDIS_POOLSIZE"),
 
-		KafkaHost: os.Getenv("KAFKA_HOST"),
-		KafkaPort: os.Getenv("KAFKA_PORT"),
+		KafkaHost:   os.Getenv("KAFKA_HOST"),
+		KafkaPort:   os.Getenv("KAFKA_PORT"),
+		KafkaTopics: []string{"OpenEnvelope", "AddUser", "AddEnvelopeToUser"},
 
 		TokenInterval: os.Getenv("TOKEN_INTERVAL"),
 		TokenMaxCount: os.Getenv("TOKEN_MAXCOUNT"),
