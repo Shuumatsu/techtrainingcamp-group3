@@ -9,6 +9,7 @@ import (
 	_ "techtrainingcamp-group3/db/rds"
 	_ "techtrainingcamp-group3/db/sql"
 	"techtrainingcamp-group3/logger"
+	_ "techtrainingcamp-group3/profiler"
 
 	"github.com/gin-gonic/gin"
 )
