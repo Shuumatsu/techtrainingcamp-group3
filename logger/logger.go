@@ -14,15 +14,15 @@ var Sugar *zap.SugaredLogger
 
 func init() {
 
-	if _,err := os.Stat(filepath.Dir(config.Conf.ZapLogFile));os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Dir(config.Conf.ZapLogFile)); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(config.Conf.ZapLogFile), 0666)
-		if err != nil{
+		if err != nil {
 			panic(err)
 		}
 	}
 
 	var stdoutWriteSyncer zapcore.WriteSyncer
-	if config.Env.LogLevel == "release" {
+	if config.Env.GinMode == "release" {
 		file, err := os.Create(config.Conf.ZapLogFile)
 		if err != nil {
 			panic(err)
