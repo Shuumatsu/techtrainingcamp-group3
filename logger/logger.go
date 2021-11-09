@@ -22,15 +22,16 @@ func init() {
 	}
 
 	var stdoutWriteSyncer zapcore.WriteSyncer
-	if config.Env.GinMode == "release" {
-		file, err := os.Create(config.Conf.ZapLogFile)
-		if err != nil {
-			panic(err)
-		}
-		stdoutWriteSyncer = zapcore.AddSync(file)
-	} else {
-		stdoutWriteSyncer = zapcore.AddSync(os.Stdout)
-	}
+	// if config.Env.GinMode == "release" {
+	// 	file, err := os.Create(config.Conf.ZapLogFile)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	stdoutWriteSyncer = zapcore.AddSync(file)
+	// } else {
+	// 	stdoutWriteSyncer = zapcore.AddSync(os.Stdout)
+	// }
+	stdoutWriteSyncer = zapcore.AddSync(os.Stdout)
 
 	encoderPreset := zap.NewProductionEncoderConfig()
 	encoderPreset.EncodeTime = zapcore.RFC3339TimeEncoder
