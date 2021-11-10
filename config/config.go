@@ -51,6 +51,8 @@ type Environment struct {
 	LogLevel string
 	// profiler
 	Profiler string
+	// bloom filter
+	Bloomfilter string
 }
 
 var Conf *Config
@@ -89,6 +91,7 @@ func init() {
 
 		LogLevel: os.Getenv("LOG_LEVEL"),
 
-		Profiler: os.Getenv("PROFILER"),
+		Profiler:    os.Getenv("PROFILER"),
+		Bloomfilter: os.Getenv("BLOOMFILTER"),
 	}
 }

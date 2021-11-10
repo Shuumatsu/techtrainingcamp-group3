@@ -73,7 +73,6 @@ func SnatchHandler(c *gin.Context) {
 			logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
 		}
 		// TODO: bloom filter
-		bloomfilter.User.AddString(user.Uid.String())
 		bloomfilter.Envelope.AddString(envelope.EnvelopeId.String())
 		logger.Sugar.Debugw("snarch handler", "success", "user", user)
 		c.JSON(200, gin.H{
