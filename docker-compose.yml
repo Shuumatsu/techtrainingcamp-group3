@@ -31,7 +31,7 @@ services:
             KAFKA_ZOOKEEPER_CONNECT: 'zoo1:2181'
             KAFKA_BROKER_ID: 1
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-            KAFKA_CREATE_TOPICS: 'stream-in:1:1,stream-out:1:1'
+            KAFKA_CREATE_TOPICS: 'test:1:1,OpenEnvelope:4:1,AddUser:4:1,AddEnvelopeToUser:4:1'
         depends_on:
             - zoo1
         container_name: kafka

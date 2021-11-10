@@ -3,12 +3,12 @@ package sqlAPI
 import (
 	"context"
 	"fmt"
-	"gorm.io/gorm"
 	"techtrainingcamp-group3/db/dbmodels"
+	"techtrainingcamp-group3/db/kfk"
 	"techtrainingcamp-group3/db/sql"
 	"techtrainingcamp-group3/db/tokenBucket"
 	"techtrainingcamp-group3/logger"
-	"time"
+	"gorm.io/gorm"
 )
 
 // FindOrCreateUserByUID
@@ -108,7 +108,9 @@ func AddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error 
 	if err != nil {
 		return err
 	}
-	return doAddEnvelopeToUserByUID(uid, envelope)
+	kfk.AddEnvelopeToUser(uid, envelope)
+	return nil
+	//return doAddEnvelopeToUserByUID(uid, envelope)
 }
 func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error {
 	tx := sql.DB.Begin()
@@ -185,53 +187,56 @@ func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error
 	return doOpenEnvelope(eid, uid)
 }
 func doOpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
-	tx := sql.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	// tx := sql.DB.Begin()
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		tx.Rollback()
+	// 	}
+	// }()
 	// check the envelope
 	envelope, err := FindEnvelopeByEID(eid)
 	if err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
+		// tx.Rollback()
 		return nil, err
 	}
 	if envelope.Opened == true {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
+		// tx.Rollback()
 		return nil, dbmodels.Error.EnvelopeAlreadyOpen
 	}
 	if envelope.Uid != uid {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
+		// tx.Rollback()
 		return nil, dbmodels.Error.ErrorEnvelopeOwner
 	}
-	// set envelope open
-	if err := tx.Model(
-		&envelope).Update("opened", true).Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
-		return nil, err
-	}
-	logger.Sugar.Debugw("OpenEnvelopeByEID", "envelope", envelope)
-	// add user amount
-	user := dbmodels.User{Uid: uid}
-	if err := tx.Model(
-		&user).Update(
-		"amount", gorm.Expr(
-			"amount + ?", envelope.Value)).Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
-		return nil, err
-	}
-	if err := tx.Commit().Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
-		return nil, err
-	}
+	kfk.OpenEnvelope(uid, *envelope)
+	envelope.Opened = true
 	return envelope, nil
+	// // set envelope open
+	// if err := tx.Model(
+	// 	&envelope).Update("opened", true).Error; err != nil {
+	// 	logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
+	// logger.Sugar.Debugw("OpenEnvelopeByEID", "envelope", envelope)
+	// // add user amount
+	// user := dbmodels.User{Uid: uid}
+	// if err := tx.Model(
+	// 	&user).Update(
+	// 	"amount", gorm.Expr(
+	// 		"amount + ?", envelope.Value)).Error; err != nil {
+	// 	logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
+	// if err := tx.Commit().Error; err != nil {
+	// 	logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
+	// return envelope, nil
 }
 
 // FindEnvelopeByUidEid
@@ -286,12 +291,12 @@ func UpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 }
 func doUpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 	// update envelope's opened and snatchtime
-	tx := sql.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	// tx := sql.DB.Begin()
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		tx.Rollback()
+	// 	}
+	// }()
 	var user dbmodels.User
 	var envelope dbmodels.Envelope
 	user.Uid = p.Uid
@@ -299,42 +304,47 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
 
 	// find envelope status
 	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope).Error; err != nil {
-		logger.Sugar.Errorw("Find Envelope By EID", "error", err)
-		tx.Rollback()
+		// logger.Sugar.Errorw("Find Envelope By EID", "error", err)
+		// tx.Rollback()
 		return nil, err
 	}
 
 	// check open status for data consistency
 	if envelope.Opened == true {
-		tx.Rollback()
+		// tx.Rollback()
 		return nil, dbmodels.Error.EnvelopeAlreadyOpen
 	}
 
-	// update envelope status to true
-	if err := tx.Table(dbmodels.Envelope{}.TableName()).Model(p).Updates(dbmodels.Envelope{Opened: true, SnatchTime: time.Now().Unix()}).Error; err != nil {
-		logger.Sugar.Errorw("SqlUpdateEnvelopeOpen fail", "envelope_id", p.EnvelopeId)
-		tx.Rollback()
-		return nil, err
-	}
+
+	// // update envelope status to true
+	// if err := tx.Table(dbmodels.Envelope{}.TableName()).Model(p).Updates(dbmodels.Envelope{Opened: true, SnatchTime: time.Now().Unix()}).Error; err != nil {
+	// 	logger.Sugar.Errorw("SqlUpdateEnvelopeOpen fail", "envelope_id", p.EnvelopeId)
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
 
 	// find user amount to get amount
 	if err := sql.DB.Table(dbmodels.User{}.TableName()).Take(&user).Error; err != nil {
 		logger.Sugar.Errorw("FindUserByUID", "error", err)
-		tx.Rollback()
+		// tx.Rollback()
 		return nil, err
 	}
 
+	kfk.OpenEnvelope(p.Uid, *p)
+
+	user.Amount += p.Value
+
 	// update user's amount added to envelope's value
-	amountAfter := user.Amount + p.Value
-	if err := tx.Table(dbmodels.User{}.TableName()).Model(&user).Update("amount", amountAfter).Error; err != nil {
-		logger.Sugar.Errorw("SqlUpdate User:amount fail", "uid", p.Uid)
-		tx.Rollback()
-		return nil, err
-	}
-	err := tx.Commit().Error
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
+	// amountAfter := user.Amount + p.Value
+	// if err := tx.Table(dbmodels.User{}.TableName()).Model(&user).Update("amount", amountAfter).Error; err != nil {
+	// 	logger.Sugar.Errorw("SqlUpdate User:amount fail", "uid", p.Uid)
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
+	// err := tx.Commit().Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return nil, err
+	// }
 	return &user, nil
 }
