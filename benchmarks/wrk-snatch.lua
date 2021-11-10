@@ -6,7 +6,7 @@ local method = 'POST'
 math.randomseed(os.time())
 
 request = function()
-    local uid = math.random(2147483648)
+    local uid = math.random(60000000)
 
     local headers = {
         ["Content-Type"] = "application/json",
