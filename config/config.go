@@ -49,6 +49,10 @@ type Environment struct {
 	GinMode string
 	// log config
 	LogLevel string
+	// profiler
+	Profiler string
+	// bloom filter
+	Bloomfilter string
 }
 
 var Conf *Config
@@ -86,5 +90,8 @@ func init() {
 		GinMode: os.Getenv("GIN_MODE"),
 
 		LogLevel: os.Getenv("LOG_LEVEL"),
+
+		Profiler:    os.Getenv("PROFILER"),
+		Bloomfilter: os.Getenv("BLOOMFILTER"),
 	}
 }
