@@ -29,7 +29,7 @@ func SnatchHandler(c *gin.Context) {
 			"msg":  models.SnatchFailure.Message(),
 		})
 	} else {
-		if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+		if bloomfilter.TestUser(dbmodels.UID(req.Uid)) == false {
 			c.JSON(200, gin.H{
 				"code": models.NotFound,
 				"msg":  models.NotFound.Message(),
@@ -73,7 +73,7 @@ func SnatchHandler(c *gin.Context) {
 			logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
 		}
 		// TODO: bloom filter
-		bloomfilter.Envelope.AddString(envelope.EnvelopeId.String())
+		bloomfilter.AddEnvelope(envelope.EnvelopeId)
 		logger.Sugar.Debugw("snarch handler", "success", "user", user)
 		c.JSON(200, gin.H{
 			"code": models.Success,
