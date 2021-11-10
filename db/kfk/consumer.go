@@ -18,6 +18,7 @@ func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
 	uid := dbmodels.UID(tmp)
 	envelope := dbmodels.Envelope{}
 	envelope.UnmarshalBinary(msg.Value)
+	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", uid, "envelope", envelope)
 	if err := tx.Model(
 		&envelope).Update("opened", true).Error; err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
@@ -54,6 +55,7 @@ func consumeAddEnvelopeToUser(msg *sarama.ConsumerMessage) error {
 	uid := dbmodels.UID(tmp)
 	envelope := dbmodels.Envelope{}
 	envelope.UnmarshalBinary(msg.Value)
+	logger.Sugar.Debugw("Consumer: AddEnvelopeToUser", "uid", uid, "envelope", envelope)
 	tx := sql.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
