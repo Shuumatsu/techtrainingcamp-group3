@@ -22,7 +22,7 @@ func WalletListHandler(c *gin.Context) {
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
 	// TODO: bloom filter
-	if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+	if bloomfilter.TestUser(dbmodels.UID(req.Uid)) == false {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotFound,
 			Msg:  models.NotFound.Message(),

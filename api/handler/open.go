@@ -41,12 +41,12 @@ func OpenHandler(c *gin.Context) {
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
 	// TODO:bloom filter
-	if bloomfilter.User.TestString(dbmodels.UID(req.Uid).String()) == false {
+	if bloomfilter.TestUser(dbmodels.UID(req.Uid)) == false {
 		ConstructErrorReply(c, models.NotFound)
 		logger.Sugar.Debugw("openHandler: user not found in bloomfilter")
 		return
 	}
-	if bloomfilter.Envelope.TestString(dbmodels.EID(req.EnvelopeId).String()) == false {
+	if bloomfilter.TestEnvelope(dbmodels.EID(req.EnvelopeId)) == false {
 		ConstructErrorReply(c, models.NotFound)
 		logger.Sugar.Debugw("openHandler: envelope not found in bloomfilter")
 		return

@@ -9,12 +9,12 @@ import (
 	"techtrainingcamp-group3/logger"
 )
 
-var User *bloom.BloomFilter
-var Envelope *bloom.BloomFilter
+var userFilter *bloom.BloomFilter
+var envelopeFilter *bloom.BloomFilter
 
 func init() {
-	User = bloom.NewWithEstimates(config.UserAmount, 0.001)
-	Envelope = bloom.NewWithEstimates(config.MaxSnatchAmount*config.UserAmount, 0.001)
+	userFilter = bloom.NewWithEstimates(config.UserAmount, 0.001)
+	envelopeFilter = bloom.NewWithEstimates(config.TotalAmount, 0.001)
 	if config.Env.Bloomfilter == "true" {
 		userRows, err := sql.DB.Model(&dbmodels.User{}).Rows()
 		defer userRows.Close()
@@ -29,7 +29,7 @@ func init() {
 			sql.DB.ScanRows(userRows, &user)
 
 			// 业务逻辑...
-			User.AddString(user.Uid.String())
+			userFilter.AddString(user.Uid.String())
 			bar.Add(1)
 		}
 		envelopeRows, err := sql.DB.Model(&dbmodels.Envelope{}).Rows()
@@ -51,9 +51,35 @@ func init() {
 			sql.DB.ScanRows(envelopeRows, &envelope)
 
 			// 业务逻辑...
-			User.AddString(envelope.Uid.String())
+			envelopeFilter.AddString(envelope.Uid.String())
 			bar.Add(1)
 		}
 	}
 	logger.Sugar.Debugw("bloom filter init success")
+}
+
+func AddUser(uid dbmodels.UID) {
+	if config.Env.Bloomfilter != "true" {
+		return
+	}
+	userFilter.AddString(uid.String())
+}
+func TestUser(uid dbmodels.UID) bool {
+	if config.Env.Bloomfilter != "true" {
+		return true
+	}
+	return userFilter.TestString(uid.String())
+}
+
+func AddEnvelope(eid dbmodels.EID) {
+	if config.Env.Bloomfilter != "true" {
+		return
+	}
+	envelopeFilter.AddString(eid.String())
+}
+func TestEnvelope(eid dbmodels.EID) bool {
+	if config.Env.Bloomfilter != "true" {
+		return true
+	}
+	return envelopeFilter.TestString(eid.String())
 }
