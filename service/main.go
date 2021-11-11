@@ -1,19 +1,42 @@
 package main
 
 import (
-	pb "techtrainingcamp-group3/proto/pkg/user"
+	"context"
+	"fmt"
+	"net"
+	user "techtrainingcamp-group3/proto/pkg/user"
+
+	"techtrainingcamp-group3/service/config"
+
+	"google.golang.org/grpc"
 )
 
-type UserServer struct{}
+type userServer struct{}
 
-func (s *UserServer) SnatchEnevelope(req pb.SnatchEnevelopeReq) (pb.SnatchEnevelopeReply, error) {
-	return pb.SnatchEnevelopeReply{}, nil
+func (s *userServer) SnatchEnevelope(ctx context.Context, req *user.SnatchEnevelopeReq) (*user.SnatchEnevelopeReply, error) {
+	return &user.SnatchEnevelopeReply{}, nil
 }
 
-func (s *UserServer) OpenEnvelope(req pb.OpenEnvelopeReq) (pb.OpenEnvelopeReply, error) {
-	return pb.OpenEnvelopeReply{}, nil
+func (s *userServer) OpenEnvelope(ctx context.Context, req *user.OpenEnvelopeReq) (*user.OpenEnvelopeReply, error) {
+	return &user.OpenEnvelopeReply{}, nil
 }
 
-func (s *UserServer) ListEnvelopes(req pb.ListEnvelopesReq) (pb.ListEnvelopesReply, error) {
-	return pb.ListEnvelopesReply{}, nil
+func (s *userServer) ListEnvelopes(ctx context.Context, req *user.ListEnvelopesReq) (*user.ListEnvelopesReply, error) {
+	return &user.ListEnvelopesReply{}, nil
+}
+
+func newServer() *userServer {
+	return &userServer{}
+}
+
+func main() {
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", config.Env.Host, config.Env.Port))
+	if err != nil {
+		panic(err)
+	}
+
+	var opts []grpc.ServerOption
+	grpcServer := grpc.NewServer(opts...)
+	user.RegisterUserServer(grpcServer, newServer())
+	grpcServer.Serve(lis)
 }
