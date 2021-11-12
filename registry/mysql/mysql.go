@@ -72,7 +72,7 @@ func RegisterDefaultUser(n uint64) error {
 		}
 		err := DB.Table(models.User{}.TableName()).Create(users).Error
 		if err != nil {
-			logger.Sugar.Errorw("register user", "error", err)
+			panic(err)
 		}
 	}
 	var i uint64 = 1
@@ -82,7 +82,6 @@ func RegisterDefaultUser(n uint64) error {
 		for j := 0; j < cap(ch); j++ {
 			ch <- struct{}{}
 		}
-		logger.Sugar.Debugw("register user start", "cpuNum", cap(ch))
 		for i = 1; i <= n-step; i += step {
 			wg.Add(1)
 			go func(i uint64, ch chan struct{}) {
@@ -95,6 +94,5 @@ func RegisterDefaultUser(n uint64) error {
 		wg.Wait()
 	}
 	doRegister(i, n)
-	logger.Sugar.Debugw("register default user success", "user num", n)
 	return nil
 }
