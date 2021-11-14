@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package service.user;
+
+message Envelope {
+    uint64 EnvelopeId = 1;
+    bool Opened = 2;
+    uint64 Value = 3;
+    int64 SnatchTime = 4;
+}
+
+// ---
+
+message SnatchEnevelopeReq { uint64 UserId = 1; }
+message SnatchEnevelopeReply {
+    uint64 EnvelopeId = 1;
+    uint64 EnvelopesCount = 2;
+}
+
+message OpenEnvelopeReq {
+    uint64 UserId = 1;
+    uint64 EnvelopeId = 2;
+}
+message OpenEnvelopeReply { uint64 Value = 1; }
+
+message ListEnvelopesReq { uint64 UserId = 1; }
+message ListEnvelopesReply { repeated Envelope Envelopes = 1; }
+
+service User {
+    rpc SnatchEnevelope(SnatchEnevelopeReq) returns (SnatchEnevelopeReply);
+
+    rpc OpenEnvelope(OpenEnvelopeReq) returns (OpenEnvelopeReply);
+
+    rpc ListEnvelopes(ListEnvelopesReq) returns (ListEnvelopesReply);
+}

@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/philandstuff/dhall-golang/v6"
 )
 
 const (
@@ -18,11 +17,6 @@ const (
 	MaxSnatchAmount = 5
 	TotalAmount     = UserAmount * MaxSnatchAmount
 )
-
-type Config struct {
-	ZapLogFile string `dhall:"zap_log_file"`
-	GinLogFile string `dhall:"gin_log_file"`
-}
 
 type Environment struct {
 	// mysql config
@@ -53,19 +47,21 @@ type Environment struct {
 	Profiler string
 	// bloom filter
 	Bloomfilter string
+	// rpc server
+	RpcHost string
+	RpcPort string
+	// http server
+	HttpHost string
+	HttpPort string
 }
 
-var Conf *Config
 var Env *Environment
 
 func init() {
-	if err := dhall.UnmarshalFile("config.dhall", &Conf); err != nil {
-		panic(err)
-	}
-
 	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
+
 	Env = &Environment{
 		DBUser:         os.Getenv("DB_USER"),
 		DBPasswd:       os.Getenv("DB_PASSWD"),
@@ -93,5 +89,12 @@ func init() {
 
 		Profiler:    os.Getenv("PROFILER"),
 		Bloomfilter: os.Getenv("BLOOMFILTER"),
+
+		// rpc server
+		RpcHost: os.Getenv("RPC_HOST"),
+		RpcPort: os.Getenv("RPC_PORT"),
+		// http server
+		HttpHost: os.Getenv("HTTP_HOST"),
+		HttpPort: os.Getenv("HTTP_PORT"),
 	}
 }
