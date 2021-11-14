@@ -2,7 +2,8 @@ version: '3'
 
 services:
     mysql:
-        build: ./db/sql/script
+        build: ./database
+        platform: linux/x86_64
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: 123456
@@ -12,18 +13,21 @@ services:
 
     redis:
         image: redis:6.2.6
+        platform: linux/x86_64
         restart: always
 
     zoo1:
         image: wurstmeister/zookeeper
+        platform: linux/x86_64
         restart: unless-stopped
         hostname: zoo1
         ports:
             - '2181:2181'
-        # container_name: zookeeper
 
     kafka1:
         image: wurstmeister/kafka
+        platform: linux/x86_64
+        restart: unless-stopped
         ports:
             - '9092:9092'
         environment:
@@ -34,19 +38,41 @@ services:
             KAFKA_CREATE_TOPICS: 'test:1:1,OpenEnvelope:4:1,AddUser:4:1,AddEnvelopeToUser:4:1'
         depends_on:
             - zoo1
-        container_name: kafka
 
-    main:
-        build: .
+    http:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        platform: linux/x86_64
+        restart: always
+        command: ./bin/http
         ports:
             - '8080:8080' # 监听8080端口，并暴露到宿主机的8080端口
         depends_on:
             - mysql
             - redis
             - kafka1
-        restart: always
         environment:
             DB_HOST: mysql
             DB_PASSWD: 123456
             REDIS_HOST: redis
             KAFKA_HOST: kafka1
+            KAFKA_PORT: 9092
+
+    rpc:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        platform: linux/x86_64
+        restart: always
+        command: ./bin/rpc
+        depends_on:
+            - mysql
+            - redis
+            - kafka1
+        environment:
+            DB_HOST: mysql
+            DB_PASSWD: 123456
+            REDIS_HOST: redis
+            KAFKA_HOST: kafka1
+            KAFKA_PORT: 9092
