@@ -15,6 +15,8 @@ PACKAGES            := $$($(PACKAGE_LIST))
 CURDIR := $(shell pwd)
 export PATH := $(CURDIR)/bin/:$(PATH)
 
+.PHONY: proto http rpc all
+
 proto:
 	cd proto && ./generate_go.sh
 
