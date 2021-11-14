@@ -24,7 +24,7 @@ func SetUserByUID(user *dbmodels.User, expiration time.Duration) error {
 }
 
 // FindUserByUID
-// 根据uid在redis中查找user
+// Find user in redis according to UID
 //
 // 如果redis中不存在该user, 返回NotFound
 // 如果redis的get操作发生错误, 返回error

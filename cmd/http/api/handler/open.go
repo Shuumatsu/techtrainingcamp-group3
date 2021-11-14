@@ -32,6 +32,7 @@ func checkOpen(p *dbmodels.Envelope) error {
 }
 
 func OpenHandler(c *gin.Context) {
+	//Check the request parameter
 	var req models.OpenReq
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -41,15 +42,16 @@ func OpenHandler(c *gin.Context) {
 	}
 	logger.Sugar.Debugw("OpenHandler",
 		"envelope_id", req.EnvelopeId, "uid", req.Uid)
-	// TODO:bloom filter
-	if bloomfilter.TestUser(dbmodels.UID(req.Uid)) == false {
+
+	//Use Redis Bloom filter to check whether uid and eid are possibly available
+	if bloomfilter.RedisTestUser(dbmodels.UID(req.Uid)) == false {
 		ConstructErrorReply(c, models.NotFound)
-		logger.Sugar.Debugw("openHandler: user not found in bloomfilter")
+		logger.Sugar.Debugw("openHandler: user not found in bloom filter")
 		return
 	}
-	if bloomfilter.TestEnvelope(dbmodels.EID(req.EnvelopeId)) == false {
+	if bloomfilter.RedisTestEnvelope(dbmodels.EID(req.EnvelopeId)) == false {
 		ConstructErrorReply(c, models.NotFound)
-		logger.Sugar.Debugw("openHandler: envelope not found in bloomfilter")
+		logger.Sugar.Debugw("openHandler: envelope not found in bloom filter")
 		return
 	}
 	var envelopeP *dbmodels.Envelope = nil
@@ -90,8 +92,6 @@ func OpenHandler(c *gin.Context) {
 		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", req.EnvelopeId, "uid", req.Uid)
 	}
 
-	// To Do: add mq to update data in sql
-
 	// Update envelope status and user amount in sql
 	userP, err := sqlAPI.UpdateEnvelopeOpen(envelopeP)
 
@@ -107,9 +107,12 @@ func OpenHandler(c *gin.Context) {
 		return
 	}
 
-	// If data success flush user to redis
+	// If data success flush user and envelope to redis
 	if err := redisAPI.SetUserByUID(userP, 300*time.Second); err != nil {
 		logger.Sugar.Errorw("Redis set user error", "uid", userP.Uid)
+	}
+	if err := redisAPI.SetEnvelopeByEID(envelopeP, 300*time.Second); err != nil {
+		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", req.EnvelopeId, "uid", req.Uid)
 	}
 
 	// Update envelope status and user amount success

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"techtrainingcamp-group3/pkg/db/bloomfilter"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
@@ -8,11 +9,11 @@ import (
 	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
 	"techtrainingcamp-group3/pkg/models"
-
-	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func WalletListHandler(c *gin.Context) {
+	//Check the request parameter
 	var req models.WalletListReq
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -22,8 +23,9 @@ func WalletListHandler(c *gin.Context) {
 	}
 	logger.Sugar.Debugw("WalletListHandler",
 		"uid", req.Uid)
-	// TODO: bloom filter
-	if bloomfilter.TestUser(dbmodels.UID(req.Uid)) == false {
+
+	// Use bloom filter to test if user exist
+	if bloomfilter.RedisTestUser(dbmodels.UID(req.Uid)) == false {
 		c.JSON(200, models.WalletListResp{
 			Code: models.NotFound,
 			Msg:  models.NotFound.Message(),
@@ -32,14 +34,15 @@ func WalletListHandler(c *gin.Context) {
 		logger.Sugar.Debugw("WalletListHandler: user not found in bloomfilter")
 		return
 	}
-	// TODO: redis
+
+	// find user in redis first
 	user, err := redisAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	if err != nil {
 		logger.Sugar.Debugw("redis not found", "uid", req.Uid)
-		// TODO: mysql
-		// redis缓存未命中
+		// redis cache miss, find user in sql
 		user, err = sqlAPI.FindUserByUID(dbmodels.UID(req.Uid))
 	}
+
 	// if mysql error
 	if err != nil {
 		switch err {
@@ -58,13 +61,12 @@ func WalletListHandler(c *gin.Context) {
 				Msg:  models.DataBaseError.Message(),
 				Data: models.WalletListData{},
 			})
-			logger.Sugar.Debugw("WalletListHandler",
+			logger.Sugar.Errorw("WalletListHandler",
 				"mysql database error", err)
 		}
 		return
 	}
 	// find envelopes which belong to the user
-	// TODO: redis
 	// parse envelope_list
 	envelopesID, err := sqlAPI.ParseEnvelopeList(user.EnvelopeList)
 	if err != nil {
@@ -73,10 +75,12 @@ func WalletListHandler(c *gin.Context) {
 			Msg:  models.ParseError.Message(),
 			Data: models.WalletListData{},
 		})
-		logger.Sugar.Debugw("WalletListHandler",
+		logger.Sugar.Errorw("WalletListHandler",
 			"can't parse envelope_list", err)
 		return
 	}
+
+	//Try to find envelopes using redis
 	envelopes := make([]dbmodels.Envelope, 0)
 	for i := 0; i < len(envelopesID); i++ {
 		envelope, err := redisAPI.FindEnvelopeByEID(envelopesID[i])
@@ -85,9 +89,10 @@ func WalletListHandler(c *gin.Context) {
 		}
 		envelopes = append(envelopes, *envelope)
 	}
+
+	//If failed to find in redis, find envelopes in sql
 	if len(envelopes) != len(envelopesID) {
 		logger.Sugar.Debugw("redis not found", "envelopes", envelopesID)
-		// TODO:mysql
 		envelopes, err = sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
 		if err != nil {
 			c.JSON(200, models.WalletListResp{
@@ -99,12 +104,20 @@ func WalletListHandler(c *gin.Context) {
 				"not found in mysql", err)
 			return
 		}
+		//If sql successes, flush sql results to redis
+		for _, envelope := range envelopes{
+			if err = redisAPI.SetEnvelopeByEID(&envelope,300*time.Second);err != nil{
+				logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
+			}
+		}
 	}
+
 	// change envelopes to resq model
 	envelopesResq := make([]models.Envelope, len(envelopes))
 	for i := 0; i < len(envelopes); i++ {
 		envelopesResq[i] = envelopes[i].ToResqModel()
 	}
+
 	// success
 	logger.Sugar.Debugw("success", "amount", user.Amount, "envelopelist", envelopesResq)
 	c.JSON(200, models.WalletListResp{
