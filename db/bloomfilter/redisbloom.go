@@ -5,6 +5,7 @@ import (
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/rds"
+	"techtrainingcamp-group3/logger"
 )
 
 const LargestPrime32 = (1<<31) -1
@@ -60,6 +61,7 @@ func (b *RedisBloom)Add(id uint64) error{
 		offset := f(id)
 		err = b.Cli.SetBit(b.Key,offset,1).Err()
 		if err != nil{
+			logger.Sugar.Errorw("bloomAddError","id",id)
 			return err
 		}
 	}
@@ -100,6 +102,7 @@ func RedisAddUser(uid dbmodels.UID) {
 	//Add user failed
 	if err := userRedisFilter.Add(uint64(uid));err != nil{
 		badUserFilter = true
+		logger.Sugar.Errorw("badUserFilter")
 	}
 }
 func RedisTestUser(uid dbmodels.UID) bool {
@@ -109,6 +112,7 @@ func RedisTestUser(uid dbmodels.UID) bool {
 	ret,err := userRedisFilter.Exist(uint64(uid))
 	if err != nil{
 		badUserFilter = true
+		logger.Sugar.Errorw("badUserFilter")
 	}
 	return ret
 }
@@ -119,6 +123,7 @@ func RedisAddEnvelope(eid dbmodels.EID) {
 	}
 	if err := envelopeRedisFilter.Add(uint64(eid));err != nil{
 		badEnvelopeFilter = true
+		logger.Sugar.Errorw("badEnvelopeFilter")
 	}
 }
 func RedisTestEnvelope(eid dbmodels.EID) bool {
@@ -128,6 +133,7 @@ func RedisTestEnvelope(eid dbmodels.EID) bool {
 	ret,err := envelopeRedisFilter.Exist(uint64(eid))
 	if err != nil{
 		badEnvelopeFilter = true
+		logger.Sugar.Errorw("badEnvelopeFilter")
 	}
 	return ret
 }
