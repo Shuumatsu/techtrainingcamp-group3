@@ -3,6 +3,7 @@ package sqlAPI
 import (
 	"context"
 	"fmt"
+	"techtrainingcamp-group3/db/bloomfilter"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/db/kfk"
 	"techtrainingcamp-group3/db/sql"
@@ -36,6 +37,7 @@ func doFindOrCreateUserByUID(defaultUser dbmodels.User) (*dbmodels.User, error) 
 		logger.Sugar.Debugw("FindOrCreateUserByUID", "error", err)
 		return nil, err
 	}
+	bloomfilter.RedisAddUser(defaultUser.Uid)
 	return &defaultUser, nil
 }
 

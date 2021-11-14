@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"techtrainingcamp-group3/config"
+	"techtrainingcamp-group3/db/bloomfilter"
 	"techtrainingcamp-group3/db/dbmodels"
 	"techtrainingcamp-group3/logger"
 	"time"
@@ -78,6 +79,7 @@ func init() {
 func RegisterDefaultUser(n uint64) error {
 	const step uint64 = 16383 // m * n < 65535, 此为user一次性插入的最大数目。
 	bar := progressbar.Default(int64(n), "register user")
+
 	doRegister := func(lo, hi uint64) {
 		users := make([]dbmodels.User, hi-lo+1)
 		for lo <= hi {
@@ -89,7 +91,12 @@ func RegisterDefaultUser(n uint64) error {
 		if err != nil {
 			logger.Sugar.Errorw("register user", "error", err)
 		}
+		//add users to bloom filter
+		for _,user := range users {
+			bloomfilter.RedisAddUser(user.Uid)
+		}
 	}
+
 	var i uint64 = 1
 	if n > step {
 		var wg sync.WaitGroup
