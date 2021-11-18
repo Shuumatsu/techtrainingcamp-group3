@@ -26,6 +26,44 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type ErrorType int32
+
+const (
+	ErrorType_NoError             ErrorType = 0
+	ErrorType_EnvelopeAlreadyOpen ErrorType = 1
+	ErrorType_WrongEnvelopeOwner  ErrorType = 2
+	ErrorType_EnvelopeNotFound    ErrorType = 3
+	ErrorType_UserNotFound        ErrorType = 4
+	ErrorType_TxFailed            ErrorType = 5
+	ErrorType_Internal            ErrorType = 100
+)
+
+var ErrorType_name = map[int32]string{
+	0:   "NoError",
+	1:   "EnvelopeAlreadyOpen",
+	2:   "WrongEnvelopeOwner",
+	3:   "EnvelopeNotFound",
+	4:   "UserNotFound",
+	5:   "TxFailed",
+	100: "Internal",
+}
+var ErrorType_value = map[string]int32{
+	"NoError":             0,
+	"EnvelopeAlreadyOpen": 1,
+	"WrongEnvelopeOwner":  2,
+	"EnvelopeNotFound":    3,
+	"UserNotFound":        4,
+	"TxFailed":            5,
+	"Internal":            100,
+}
+
+func (x ErrorType) String() string {
+	return proto.EnumName(ErrorType_name, int32(x))
+}
+func (ErrorType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{0}
+}
+
 type Envelope struct {
 	EnvelopeId           uint64   `protobuf:"varint,1,opt,name=EnvelopeId,proto3" json:"EnvelopeId,omitempty"`
 	Opened               bool     `protobuf:"varint,2,opt,name=Opened,proto3" json:"Opened,omitempty"`
@@ -40,7 +78,7 @@ func (m *Envelope) Reset()         { *m = Envelope{} }
 func (m *Envelope) String() string { return proto.CompactTextString(m) }
 func (*Envelope) ProtoMessage()    {}
 func (*Envelope) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{0}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{0}
 }
 func (m *Envelope) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -108,7 +146,7 @@ func (m *SnatchEnevelopeReq) Reset()         { *m = SnatchEnevelopeReq{} }
 func (m *SnatchEnevelopeReq) String() string { return proto.CompactTextString(m) }
 func (*SnatchEnevelopeReq) ProtoMessage()    {}
 func (*SnatchEnevelopeReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{1}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{1}
 }
 func (m *SnatchEnevelopeReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -145,18 +183,19 @@ func (m *SnatchEnevelopeReq) GetUserId() uint64 {
 }
 
 type SnatchEnevelopeReply struct {
-	EnvelopeId           uint64   `protobuf:"varint,1,opt,name=EnvelopeId,proto3" json:"EnvelopeId,omitempty"`
-	EnvelopesCount       uint64   `protobuf:"varint,2,opt,name=EnvelopesCount,proto3" json:"EnvelopesCount,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ErrorType            ErrorType `protobuf:"varint,1,opt,name=ErrorType,proto3,enum=service.user.ErrorType" json:"ErrorType,omitempty"`
+	EnvelopeId           uint64    `protobuf:"varint,2,opt,name=EnvelopeId,proto3" json:"EnvelopeId,omitempty"`
+	EnvelopesCount       uint64    `protobuf:"varint,3,opt,name=EnvelopesCount,proto3" json:"EnvelopesCount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *SnatchEnevelopeReply) Reset()         { *m = SnatchEnevelopeReply{} }
 func (m *SnatchEnevelopeReply) String() string { return proto.CompactTextString(m) }
 func (*SnatchEnevelopeReply) ProtoMessage()    {}
 func (*SnatchEnevelopeReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{2}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{2}
 }
 func (m *SnatchEnevelopeReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -185,6 +224,13 @@ func (m *SnatchEnevelopeReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SnatchEnevelopeReply proto.InternalMessageInfo
 
+func (m *SnatchEnevelopeReply) GetErrorType() ErrorType {
+	if m != nil {
+		return m.ErrorType
+	}
+	return ErrorType_NoError
+}
+
 func (m *SnatchEnevelopeReply) GetEnvelopeId() uint64 {
 	if m != nil {
 		return m.EnvelopeId
@@ -211,7 +257,7 @@ func (m *OpenEnvelopeReq) Reset()         { *m = OpenEnvelopeReq{} }
 func (m *OpenEnvelopeReq) String() string { return proto.CompactTextString(m) }
 func (*OpenEnvelopeReq) ProtoMessage()    {}
 func (*OpenEnvelopeReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{3}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{3}
 }
 func (m *OpenEnvelopeReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -255,17 +301,18 @@ func (m *OpenEnvelopeReq) GetEnvelopeId() uint64 {
 }
 
 type OpenEnvelopeReply struct {
-	Value                uint64   `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ErrorType            ErrorType `protobuf:"varint,1,opt,name=ErrorType,proto3,enum=service.user.ErrorType" json:"ErrorType,omitempty"`
+	Value                uint64    `protobuf:"varint,2,opt,name=Value,proto3" json:"Value,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *OpenEnvelopeReply) Reset()         { *m = OpenEnvelopeReply{} }
 func (m *OpenEnvelopeReply) String() string { return proto.CompactTextString(m) }
 func (*OpenEnvelopeReply) ProtoMessage()    {}
 func (*OpenEnvelopeReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{4}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{4}
 }
 func (m *OpenEnvelopeReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -294,6 +341,13 @@ func (m *OpenEnvelopeReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_OpenEnvelopeReply proto.InternalMessageInfo
 
+func (m *OpenEnvelopeReply) GetErrorType() ErrorType {
+	if m != nil {
+		return m.ErrorType
+	}
+	return ErrorType_NoError
+}
+
 func (m *OpenEnvelopeReply) GetValue() uint64 {
 	if m != nil {
 		return m.Value
@@ -312,7 +366,7 @@ func (m *ListEnvelopesReq) Reset()         { *m = ListEnvelopesReq{} }
 func (m *ListEnvelopesReq) String() string { return proto.CompactTextString(m) }
 func (*ListEnvelopesReq) ProtoMessage()    {}
 func (*ListEnvelopesReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{5}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{5}
 }
 func (m *ListEnvelopesReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -349,7 +403,8 @@ func (m *ListEnvelopesReq) GetUserId() uint64 {
 }
 
 type ListEnvelopesReply struct {
-	Envelopes            []*Envelope `protobuf:"bytes,1,rep,name=Envelopes" json:"Envelopes,omitempty"`
+	ErrorType            ErrorType   `protobuf:"varint,1,opt,name=ErrorType,proto3,enum=service.user.ErrorType" json:"ErrorType,omitempty"`
+	Envelopes            []*Envelope `protobuf:"bytes,2,rep,name=Envelopes" json:"Envelopes,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -359,7 +414,7 @@ func (m *ListEnvelopesReply) Reset()         { *m = ListEnvelopesReply{} }
 func (m *ListEnvelopesReply) String() string { return proto.CompactTextString(m) }
 func (*ListEnvelopesReply) ProtoMessage()    {}
 func (*ListEnvelopesReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_1807e2a5bbb58455, []int{6}
+	return fileDescriptor_user_33fdcdc9b56e5b21, []int{6}
 }
 func (m *ListEnvelopesReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -388,6 +443,13 @@ func (m *ListEnvelopesReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ListEnvelopesReply proto.InternalMessageInfo
 
+func (m *ListEnvelopesReply) GetErrorType() ErrorType {
+	if m != nil {
+		return m.ErrorType
+	}
+	return ErrorType_NoError
+}
+
 func (m *ListEnvelopesReply) GetEnvelopes() []*Envelope {
 	if m != nil {
 		return m.Envelopes
@@ -403,6 +465,7 @@ func init() {
 	proto.RegisterType((*OpenEnvelopeReply)(nil), "service.user.OpenEnvelopeReply")
 	proto.RegisterType((*ListEnvelopesReq)(nil), "service.user.ListEnvelopesReq")
 	proto.RegisterType((*ListEnvelopesReply)(nil), "service.user.ListEnvelopesReply")
+	proto.RegisterEnum("service.user.ErrorType", ErrorType_name, ErrorType_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -630,13 +693,18 @@ func (m *SnatchEnevelopeReply) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.EnvelopeId != 0 {
+	if m.ErrorType != 0 {
 		dAtA[i] = 0x8
+		i++
+		i = encodeVarintUser(dAtA, i, uint64(m.ErrorType))
+	}
+	if m.EnvelopeId != 0 {
+		dAtA[i] = 0x10
 		i++
 		i = encodeVarintUser(dAtA, i, uint64(m.EnvelopeId))
 	}
 	if m.EnvelopesCount != 0 {
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 		i++
 		i = encodeVarintUser(dAtA, i, uint64(m.EnvelopesCount))
 	}
@@ -692,8 +760,13 @@ func (m *OpenEnvelopeReply) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Value != 0 {
+	if m.ErrorType != 0 {
 		dAtA[i] = 0x8
+		i++
+		i = encodeVarintUser(dAtA, i, uint64(m.ErrorType))
+	}
+	if m.Value != 0 {
+		dAtA[i] = 0x10
 		i++
 		i = encodeVarintUser(dAtA, i, uint64(m.Value))
 	}
@@ -744,9 +817,14 @@ func (m *ListEnvelopesReply) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.ErrorType != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintUser(dAtA, i, uint64(m.ErrorType))
+	}
 	if len(m.Envelopes) > 0 {
 		for _, msg := range m.Envelopes {
-			dAtA[i] = 0xa
+			dAtA[i] = 0x12
 			i++
 			i = encodeVarintUser(dAtA, i, uint64(msg.Size()))
 			n, err := msg.MarshalTo(dAtA[i:])
@@ -807,6 +885,9 @@ func (m *SnatchEnevelopeReq) Size() (n int) {
 func (m *SnatchEnevelopeReply) Size() (n int) {
 	var l int
 	_ = l
+	if m.ErrorType != 0 {
+		n += 1 + sovUser(uint64(m.ErrorType))
+	}
 	if m.EnvelopeId != 0 {
 		n += 1 + sovUser(uint64(m.EnvelopeId))
 	}
@@ -837,6 +918,9 @@ func (m *OpenEnvelopeReq) Size() (n int) {
 func (m *OpenEnvelopeReply) Size() (n int) {
 	var l int
 	_ = l
+	if m.ErrorType != 0 {
+		n += 1 + sovUser(uint64(m.ErrorType))
+	}
 	if m.Value != 0 {
 		n += 1 + sovUser(uint64(m.Value))
 	}
@@ -861,6 +945,9 @@ func (m *ListEnvelopesReq) Size() (n int) {
 func (m *ListEnvelopesReply) Size() (n int) {
 	var l int
 	_ = l
+	if m.ErrorType != 0 {
+		n += 1 + sovUser(uint64(m.ErrorType))
+	}
 	if len(m.Envelopes) > 0 {
 		for _, e := range m.Envelopes {
 			l = e.Size()
@@ -1115,6 +1202,25 @@ func (m *SnatchEnevelopeReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorType", wireType)
+			}
+			m.ErrorType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUser
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ErrorType |= (ErrorType(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EnvelopeId", wireType)
 			}
 			m.EnvelopeId = 0
@@ -1132,7 +1238,7 @@ func (m *SnatchEnevelopeReply) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 2:
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EnvelopesCount", wireType)
 			}
@@ -1293,6 +1399,25 @@ func (m *OpenEnvelopeReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorType", wireType)
+			}
+			m.ErrorType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUser
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ErrorType |= (ErrorType(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}
 			m.Value = 0
@@ -1432,6 +1557,25 @@ func (m *ListEnvelopesReply) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorType", wireType)
+			}
+			m.ErrorType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUser
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ErrorType |= (ErrorType(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Envelopes", wireType)
 			}
@@ -1589,30 +1733,37 @@ var (
 	ErrIntOverflowUser   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("user.proto", fileDescriptor_user_1807e2a5bbb58455) }
+func init() { proto.RegisterFile("user.proto", fileDescriptor_user_33fdcdc9b56e5b21) }
 
-var fileDescriptor_user_1807e2a5bbb58455 = []byte{
-	// 344 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x53, 0xcd, 0x4a, 0xf3, 0x40,
-	0x14, 0xfd, 0xa6, 0xcd, 0x57, 0xea, 0xb5, 0xda, 0x3a, 0x94, 0x12, 0x0a, 0x8e, 0xc3, 0x2c, 0x24,
-	0x8a, 0x64, 0x51, 0x7d, 0x02, 0xa5, 0x8b, 0x8a, 0x28, 0xc6, 0xbf, 0x9d, 0x50, 0xdb, 0x0b, 0x16,
-	0x62, 0x12, 0xf3, 0x53, 0xec, 0xd6, 0xa7, 0xf0, 0x91, 0x5c, 0xfa, 0x08, 0x12, 0x5f, 0x44, 0x26,
-	0x69, 0x62, 0x32, 0x85, 0x74, 0x97, 0x73, 0xe6, 0xde, 0x73, 0xce, 0x9c, 0x21, 0x00, 0x51, 0x80,
-	0xbe, 0xe9, 0xf9, 0x6e, 0xe8, 0xd2, 0x56, 0x80, 0xfe, 0x7c, 0x36, 0x41, 0x53, 0x72, 0xe2, 0x0d,
-	0x9a, 0x43, 0x67, 0x8e, 0xb6, 0xeb, 0x21, 0x65, 0x00, 0xd9, 0xf7, 0x68, 0xaa, 0x13, 0x4e, 0x0c,
-	0xcd, 0x2a, 0x30, 0xb4, 0x07, 0x8d, 0x2b, 0x0f, 0x1d, 0x9c, 0xea, 0x35, 0x4e, 0x8c, 0xa6, 0xb5,
-	0x44, 0xb4, 0x0b, 0xff, 0xef, 0xc7, 0x76, 0x84, 0x7a, 0x3d, 0x59, 0x49, 0x81, 0x54, 0xbb, 0x71,
-	0xc6, 0xe1, 0xe4, 0xf9, 0x76, 0xf6, 0x82, 0xba, 0xc6, 0x89, 0x51, 0xb7, 0x0a, 0x8c, 0x38, 0x02,
-	0x9a, 0xa2, 0xa1, 0x83, 0xa9, 0x85, 0x85, 0xaf, 0xd2, 0xe3, 0x2e, 0x40, 0x3f, 0xf7, 0x5f, 0x22,
-	0xf1, 0x08, 0xdd, 0x95, 0x69, 0xcf, 0x5e, 0xac, 0xcd, 0xbc, 0x0f, 0xdb, 0x19, 0x0a, 0xce, 0xdc,
-	0xc8, 0x09, 0x93, 0xec, 0x9a, 0xa5, 0xb0, 0x62, 0x04, 0x6d, 0x79, 0x9b, 0x8c, 0xad, 0x88, 0xa2,
-	0x58, 0xd6, 0x54, 0x4b, 0x71, 0x00, 0x3b, 0x65, 0x29, 0x99, 0x33, 0xef, 0x88, 0x14, 0x3a, 0x12,
-	0x87, 0xd0, 0xb9, 0x98, 0x05, 0x61, 0x9e, 0xa5, 0xaa, 0x81, 0x73, 0xa0, 0xca, 0xac, 0xd4, 0x3d,
-	0x81, 0x8d, 0x9c, 0xd1, 0x09, 0xaf, 0x1b, 0x9b, 0x83, 0x9e, 0x59, 0x7c, 0x61, 0x33, 0xcf, 0xf1,
-	0x37, 0x38, 0x78, 0xaf, 0x81, 0x26, 0x65, 0xe9, 0x03, 0xb4, 0x95, 0x5a, 0x29, 0x2f, 0xaf, 0xaf,
-	0xbe, 0x51, 0x5f, 0xac, 0x99, 0x90, 0xb9, 0x2e, 0xa1, 0x55, 0x2c, 0x81, 0xee, 0x96, 0x77, 0x94,
-	0xae, 0xfb, 0x7b, 0x55, 0xc7, 0x52, 0xef, 0x1a, 0xb6, 0x4a, 0xb7, 0xa7, 0xac, 0xbc, 0xa1, 0xd6,
-	0xd8, 0xe7, 0x95, 0xe7, 0x9e, 0xbd, 0x38, 0xed, 0x7c, 0xc6, 0x8c, 0x7c, 0xc5, 0x8c, 0x7c, 0xc7,
-	0x8c, 0x7c, 0xfc, 0xb0, 0x7f, 0x4f, 0x8d, 0xe4, 0x0f, 0x39, 0xfe, 0x0d, 0x00, 0x00, 0xff, 0xff,
-	0x7c, 0x71, 0x5a, 0x9f, 0x2f, 0x03, 0x00, 0x00,
+var fileDescriptor_user_33fdcdc9b56e5b21 = []byte{
+	// 456 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0xc1, 0x6e, 0xd3, 0x40,
+	0x10, 0xed, 0x3a, 0x69, 0x49, 0xa7, 0xa1, 0x5d, 0x86, 0x28, 0xb5, 0x22, 0x61, 0x2c, 0x1f, 0x50,
+	0x54, 0xa1, 0x1c, 0x02, 0x7c, 0x00, 0xa0, 0x54, 0x8a, 0x84, 0x52, 0x61, 0x02, 0xbd, 0x62, 0xea,
+	0x11, 0x58, 0x32, 0xbb, 0x66, 0x6d, 0x97, 0xfa, 0x08, 0x77, 0x8e, 0x48, 0x7c, 0x12, 0x47, 0x3e,
+	0x01, 0x85, 0x1f, 0x41, 0xeb, 0xc4, 0xae, 0xed, 0x48, 0xee, 0xa1, 0x37, 0xbf, 0x37, 0x6f, 0x66,
+	0xfc, 0x66, 0x46, 0x0b, 0x90, 0xc6, 0xa4, 0x26, 0x91, 0x92, 0x89, 0xc4, 0x7e, 0x4c, 0xea, 0x32,
+	0xb8, 0xa0, 0x89, 0xe6, 0x9c, 0x2b, 0xe8, 0xcd, 0xc4, 0x25, 0x85, 0x32, 0x22, 0xb4, 0x00, 0x8a,
+	0xef, 0xb9, 0x6f, 0x32, 0x9b, 0x8d, 0xbb, 0x6e, 0x85, 0xc1, 0x21, 0xec, 0x9d, 0x45, 0x24, 0xc8,
+	0x37, 0x0d, 0x9b, 0x8d, 0x7b, 0xee, 0x06, 0xe1, 0x00, 0x76, 0xdf, 0x79, 0x61, 0x4a, 0x66, 0x27,
+	0x4f, 0x59, 0x03, 0x5d, 0xed, 0x8d, 0xf0, 0x92, 0x8b, 0x4f, 0xcb, 0xe0, 0x33, 0x99, 0x5d, 0x9b,
+	0x8d, 0x3b, 0x6e, 0x85, 0x71, 0x1e, 0x03, 0xae, 0xd1, 0x4c, 0xd0, 0xba, 0x85, 0x4b, 0x5f, 0x74,
+	0x8f, 0xb7, 0x31, 0xa9, 0xb2, 0xff, 0x06, 0x39, 0x3f, 0x19, 0x0c, 0xb6, 0xe4, 0x51, 0x98, 0xe1,
+	0x33, 0xd8, 0x9f, 0x29, 0x25, 0xd5, 0x32, 0x8b, 0x28, 0xcf, 0x39, 0x9c, 0x1e, 0x4f, 0xaa, 0x16,
+	0x27, 0x65, 0xd8, 0xbd, 0x56, 0x36, 0xbc, 0x1a, 0x5b, 0x5e, 0x1f, 0xc1, 0x61, 0x81, 0xe2, 0x97,
+	0x32, 0x15, 0xc9, 0xc6, 0x5c, 0x83, 0x75, 0xe6, 0x70, 0xa4, 0xa7, 0x50, 0xb0, 0x2d, 0x16, 0x6e,
+	0x6a, 0xe9, 0xbc, 0x87, 0x7b, 0xf5, 0x52, 0xb7, 0xb0, 0x57, 0xae, 0xc4, 0xa8, 0xac, 0xc4, 0x39,
+	0x01, 0xfe, 0x2a, 0x88, 0x93, 0xd2, 0x42, 0xdb, 0xc0, 0xbf, 0x31, 0xc0, 0x86, 0xf8, 0x16, 0xff,
+	0xf3, 0x14, 0xf6, 0xcb, 0x42, 0xa6, 0x61, 0x77, 0xc6, 0x07, 0xd3, 0x61, 0x23, 0xad, 0xb0, 0x7d,
+	0x2d, 0x3c, 0xf9, 0xc1, 0x2a, 0xdd, 0xf0, 0x00, 0xee, 0x2c, 0x64, 0x0e, 0xf9, 0x0e, 0x1e, 0xc3,
+	0xfd, 0x42, 0xf7, 0x3c, 0x54, 0xe4, 0xf9, 0x99, 0x9e, 0x1d, 0x67, 0x38, 0x04, 0x3c, 0x57, 0x52,
+	0x7c, 0x2c, 0xa2, 0x67, 0x5f, 0x05, 0x29, 0x6e, 0xe0, 0x00, 0x78, 0x41, 0x2d, 0x64, 0x72, 0x2a,
+	0x53, 0xe1, 0xf3, 0x0e, 0x72, 0xe8, 0x6b, 0xbf, 0x25, 0xd3, 0xc5, 0x3e, 0xf4, 0x96, 0x57, 0xa7,
+	0x5e, 0x10, 0x92, 0xcf, 0x77, 0x35, 0x9a, 0x8b, 0x84, 0x94, 0xf0, 0x42, 0xee, 0x4f, 0xbf, 0x1b,
+	0xd0, 0xd5, 0x72, 0x3c, 0x87, 0xa3, 0xc6, 0x31, 0xa2, 0x5d, 0xb7, 0xb3, 0x7d, 0xda, 0x23, 0xe7,
+	0x06, 0x85, 0x1e, 0xef, 0x02, 0xfa, 0xd5, 0x1b, 0xc0, 0x07, 0xf5, 0x9c, 0xc6, 0xa9, 0x8d, 0x1e,
+	0xb6, 0x85, 0x75, 0xbd, 0xd7, 0x70, 0xb7, 0xb6, 0x44, 0xb4, 0xea, 0x19, 0xcd, 0x73, 0x18, 0xd9,
+	0xad, 0xf1, 0x28, 0xcc, 0x5e, 0xf0, 0xdf, 0x2b, 0x8b, 0xfd, 0x59, 0x59, 0xec, 0xef, 0xca, 0x62,
+	0xbf, 0xfe, 0x59, 0x3b, 0x1f, 0xf6, 0xf2, 0x87, 0xe5, 0xc9, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x4a, 0xeb, 0x39, 0x83, 0x66, 0x04, 0x00, 0x00,
 }

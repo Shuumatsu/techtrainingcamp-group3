@@ -14,7 +14,8 @@ func NewLogger(level zapcore.Level) *zap.Logger {
 
 	encoderPreset := zap.NewProductionEncoderConfig()
 	encoderPreset.EncodeTime = zapcore.RFC3339TimeEncoder
-	encoder := zapcore.NewJSONEncoder(encoderPreset)
+	encoder := zapcore.NewConsoleEncoder(encoderPreset)
+	// encoder := zapcore.NewJSONEncoder(encoderPreset)
 
 	core := zapcore.NewCore(encoder, stdoutWriteSyncer, level)
 

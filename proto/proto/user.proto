@@ -11,20 +11,38 @@ message Envelope {
 
 // ---
 
+enum ErrorType {
+    NoError = 0;
+    EnvelopeAlreadyOpen = 1;
+    WrongEnvelopeOwner = 2;
+    EnvelopeNotFound = 3;
+    UserNotFound = 4;
+
+    TxFailed = 5;
+    Internal = 100;
+}
+
 message SnatchEnevelopeReq { uint64 UserId = 1; }
 message SnatchEnevelopeReply {
-    uint64 EnvelopeId = 1;
-    uint64 EnvelopesCount = 2;
+    ErrorType ErrorType = 1;
+    uint64 EnvelopeId = 2;
+    uint64 EnvelopesCount = 3;
 }
 
 message OpenEnvelopeReq {
     uint64 UserId = 1;
     uint64 EnvelopeId = 2;
 }
-message OpenEnvelopeReply { uint64 Value = 1; }
+message OpenEnvelopeReply {
+    ErrorType ErrorType = 1;
+    uint64 Value = 2;
+}
 
 message ListEnvelopesReq { uint64 UserId = 1; }
-message ListEnvelopesReply { repeated Envelope Envelopes = 1; }
+message ListEnvelopesReply {
+    ErrorType ErrorType = 1;
+    repeated Envelope Envelopes = 2;
+}
 
 service User {
     rpc SnatchEnevelope(SnatchEnevelopeReq) returns (SnatchEnevelopeReply);

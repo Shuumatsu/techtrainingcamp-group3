@@ -16,28 +16,28 @@ services:
         platform: linux/x86_64
         restart: always
 
-    zoo1:
+    zoom:
         image: wurstmeister/zookeeper
         platform: linux/x86_64
         restart: unless-stopped
-        hostname: zoo1
+        hostname: zoom
         ports:
             - '2181:2181'
 
-    kafka1:
+    kafka:
         image: wurstmeister/kafka
         platform: linux/x86_64
         restart: unless-stopped
         ports:
             - '9092:9092'
         environment:
-            KAFKA_ADVERTISED_HOST_NAME: kafka1
-            KAFKA_ZOOKEEPER_CONNECT: 'zoo1:2181'
+            KAFKA_ADVERTISED_HOST_NAME: kafka
+            KAFKA_ZOOKEEPER_CONNECT: 'zoom:2181'
             KAFKA_BROKER_ID: 1
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
             KAFKA_CREATE_TOPICS: 'test:1:1,OpenEnvelope:4:1,AddUser:4:1,AddEnvelopeToUser:4:1'
         depends_on:
-            - zoo1
+            - zoom
 
     http:
         build:
@@ -51,13 +51,15 @@ services:
         depends_on:
             - mysql
             - redis
-            - kafka1
+            - kafka
+            - rpc
         environment:
             DB_HOST: mysql
             DB_PASSWD: 123456
             REDIS_HOST: redis
-            KAFKA_HOST: kafka1
+            KAFKA_HOST: kafka
             KAFKA_PORT: 9092
+            RPC_HOST: rpc
 
     rpc:
         build:
@@ -69,10 +71,10 @@ services:
         depends_on:
             - mysql
             - redis
-            - kafka1
+            - kafka
         environment:
             DB_HOST: mysql
             DB_PASSWD: 123456
             REDIS_HOST: redis
-            KAFKA_HOST: kafka1
+            KAFKA_HOST: kafka
             KAFKA_PORT: 9092
