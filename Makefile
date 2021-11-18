@@ -19,6 +19,7 @@ export PATH := $(CURDIR)/bin/:$(PATH)
 
 proto:
 	cd proto && ./generate_go.sh
+	$(GO) mod vendor && $(GO) mod tidy
 
 http: 
 	$(GOBUILD) -o bin ./cmd/http
