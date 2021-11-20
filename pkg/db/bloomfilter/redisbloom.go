@@ -1,7 +1,7 @@
 package bloomfilter
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
 	"techtrainingcamp-group3/pkg/db/rds"
@@ -59,7 +59,7 @@ func (b *RedisBloom)Add(id uint64) error{
 	var err error
 	for _,f := range b.HashFuncs{
 		offset := f(id)
-		err = b.Cli.SetBit(b.Key,offset,1).Err()
+		err = b.Cli.SetBit(rds.Ctx,b.Key,offset,1).Err()
 		if err != nil{
 			logger.Sugar.Errorw("bloomAddError","id",id)
 			return err
@@ -73,7 +73,7 @@ func (b *RedisBloom)Add(id uint64) error{
 func (b *RedisBloom) Exist(id uint64) (bool,error){
 	for _,f := range b.HashFuncs {
 		offset := f(id)
-		cmd := b.Cli.GetBit(b.Key,offset)
+		cmd := b.Cli.GetBit(rds.Ctx,b.Key,offset)
 		 v,err :=cmd.Result();
 		 if err != nil{
 			return true,err

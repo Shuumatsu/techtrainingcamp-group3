@@ -15,7 +15,7 @@ import (
 //
 // 设置不成功返回error
 func SetUserByUID(user *dbmodels.User, expiration time.Duration) error {
-	err := rds.DB.Set(user.Uid.Key(), user, expiration).Err()
+	err := rds.DB.Set(rds.Ctx,user.Uid.Key(), user, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set user by uid", "error", err)
 		return err
@@ -30,7 +30,7 @@ func SetUserByUID(user *dbmodels.User, expiration time.Duration) error {
 // 如果redis的get操作发生错误, 返回error
 func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
 	var user dbmodels.User
-	err := rds.DB.Get(uid.Key()).Scan(&user)
+	err := rds.DB.Get(rds.Ctx,uid.Key()).Scan(&user)
 	if err != nil {
 		if err == redis.Nil {
 			return nil, Error.NotFound
@@ -46,7 +46,7 @@ func FindUserByUID(uid dbmodels.UID) (*dbmodels.User, error) {
 //
 // 设置不成功返回error
 func SetEnvelopeByEID(envelope *dbmodels.Envelope, expiration time.Duration) error {
-	err := rds.DB.Set(envelope.EnvelopeId.Key(), envelope, expiration).Err()
+	err := rds.DB.Set(rds.Ctx,envelope.EnvelopeId.Key(), envelope, expiration).Err()
 	if err != nil {
 		logger.Sugar.Errorw("redis: set envelope by eid", "error", err)
 		return err
@@ -61,7 +61,7 @@ func SetEnvelopeByEID(envelope *dbmodels.Envelope, expiration time.Duration) err
 // 如果redis的get操作发生错误, 返回error
 func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
-	err := rds.DB.Get(eid.Key()).Scan(&envelope)
+	err := rds.DB.Get(rds.Ctx,eid.Key()).Scan(&envelope)
 	if err != nil {
 		if err == redis.Nil {
 			return nil, Error.NotFound
@@ -75,7 +75,7 @@ func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
 //	find the envelope and check the envelope owner
 func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
 	var envelope dbmodels.Envelope
-	err := rds.DB.Get(eid.Key()).Scan(&envelope)
+	err := rds.DB.Get(rds.Ctx,eid.Key()).Scan(&envelope)
 	if err != nil {
 		if err == redis.Nil {
 			return nil, Error.NotFound
@@ -89,6 +89,6 @@ func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 }
 // DeleteEnvelopeByEID
 func DelEnvelopeByEID(eid dbmodels.EID) error {
-	err := rds.DB.Del(eid.Key()).Err()
+	err := rds.DB.Del(rds.Ctx,eid.Key()).Err()
 	return err
 }

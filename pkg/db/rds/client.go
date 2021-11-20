@@ -1,14 +1,15 @@
 package rds
 
 import (
+	"context"
+	"github.com/go-redis/redis/v8"
 	"strconv"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/logger"
-
-	"github.com/go-redis/redis"
 )
 
 var DB *redis.Client
+var Ctx = context.Background()
 
 func init() {
 	poolSize, err := strconv.Atoi(config.Env.RedisPoolSize)
@@ -23,7 +24,7 @@ func init() {
 		PoolSize: poolSize,
 	}
 	rd := redis.NewClient(&option)
-	if pingResult, err := rd.Ping().Result(); err != nil {
+	if pingResult, err := rd.Ping(Ctx).Result(); err != nil {
 		logger.Sugar.Fatalw("redis init error",
 			"redis config", rd,
 			"ping redis result", pingResult,
