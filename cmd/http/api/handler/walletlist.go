@@ -95,7 +95,7 @@ func WalletListHandler(c *gin.Context) {
 	// If some envelopes failed to find in redis, find them in sql
 	for i := 0; i < len(redisNotFoundIdx); i++ {
 		idx := redisNotFoundIdx[i]
-		envelope, err := sqlAPI.FindEnvelopeByEID(envelopesID[idx])
+		envelope, err := sqlAPI.FindEnvelopeByUidEid(envelopesID[idx], dbmodels.UID(req.Uid))
 		if err != nil {
 			c.JSON(200, models.WalletListResp{
 				Code: models.DataBaseError,
