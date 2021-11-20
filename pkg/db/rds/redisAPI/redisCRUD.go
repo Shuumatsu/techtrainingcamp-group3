@@ -87,3 +87,8 @@ func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 	}
 	return &envelope, nil
 }
+// DeleteEnvelopeByEID
+func DelEnvelopeByEID(eid dbmodels.EID) error {
+	err := rds.DB.Del(eid.Key()).Err()
+	return err
+}
