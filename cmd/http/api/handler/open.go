@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"techtrainingcamp-group3/pkg/db/bloomfilter"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
+	"techtrainingcamp-group3/pkg/db/kfk"
 	"techtrainingcamp-group3/pkg/db/rds/redisAPI"
 	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
@@ -92,30 +93,17 @@ func OpenHandler(c *gin.Context) {
 		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", req.EnvelopeId, "uid", req.Uid)
 	}
 
-	// Update envelope status and user amount in sql
-	userP, err := sqlAPI.UpdateEnvelopeOpen(envelopeP)
+	// Put update envelope status and user amount in sql execution to kafka
+	err = kfk.OpenEnvelope(dbmodels.UID(req.Uid),envelopeP)
 
-	// check for envelope status again
-	if errors.Is(err, dbmodels.Error.EnvelopeAlreadyOpen) {
-		ConstructErrorReply(c, models.EnvelopeAlreadyOpen)
-		return
-	}
-
-	// If error happened, return false
+	// If can not put message into kafka, move envelope from redis
 	if err != nil {
-		ConstructErrorReply(c, models.DataBaseError)
+		redisAPI.DelEnvelopeByEID(envelopeP.EnvelopeId)
+		ConstructErrorReply(c, models.KafkaError)
 		return
 	}
 
-	// If data success flush user and envelope to redis
-	if err := redisAPI.SetUserByUID(userP, 300*time.Second); err != nil {
-		logger.Sugar.Errorw("Redis set user error", "uid", userP.Uid)
-	}
-	if err := redisAPI.SetEnvelopeByEID(envelopeP, 300*time.Second); err != nil {
-		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", req.EnvelopeId, "uid", req.Uid)
-	}
-
-	// Update envelope status and user amount success
+	// Open API success
 	logger.Sugar.Debugw("Open Handler success", "envelopeId", envelopeP.EnvelopeId)
 	c.JSON(200, gin.H{
 		"code": models.Success,

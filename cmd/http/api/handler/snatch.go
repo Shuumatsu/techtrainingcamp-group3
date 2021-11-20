@@ -1,19 +1,18 @@
 package handler
 
 import (
+	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/db/bloomfilter"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
+	"techtrainingcamp-group3/pkg/db/kfk"
 	"techtrainingcamp-group3/pkg/db/rds/redisAPI"
 	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
 	"techtrainingcamp-group3/pkg/models"
 	"techtrainingcamp-group3/pkg/tools"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -71,30 +70,21 @@ func SnatchHandler(c *gin.Context) {
 		//Generate envelope
 		envelope := tools.GetRandEnvelope(user.Uid)
 
-		// create the envelope in envelope table and append it to the user's envelope_list
-		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), envelope)
+		// put create the envelope in envelope table and append it to the user's envelope_list into kafka
+		err = kfk.AddEnvelopeToUser(dbmodels.UID(req.Uid), envelope)
 		if err != nil {
+			logger.Sugar.Errorw("AddEnvelopeToUser kafka error","error",err)
 			c.JSON(200, gin.H{
-				"code": models.DataBaseError,
-				"msg":  models.DataBaseError.Message(),
+				"code": models.KafkaError,
+				"msg":  models.KafkaError.Message(),
 			})
 			return
 		}
 
-		//Update user's information in redis
-		user.EnvelopeList += "," + envelope.EnvelopeId.String()
-		err = redisAPI.SetUserByUID(user, 300*time.Second)
-		if err != nil {
-			logger.Sugar.Debugw("snatch", "redis set error", err, "user", user)
-		}
-
-		//Update envelope's information in redis
-		err = redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second)
-		if err != nil {
-			logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
-		}
 		//Update bloom filter for envelope
 		bloomfilter.RedisAddEnvelope(envelope.EnvelopeId)
+
+		user.EnvelopeList += "," + envelope.EnvelopeId.String()
 		logger.Sugar.Debugw("snatch handler", "success", "user", user)
 		c.JSON(200, gin.H{
 			"code": models.Success,
