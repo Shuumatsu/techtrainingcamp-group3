@@ -3,9 +3,9 @@ package sqlAPI
 import (
 	"fmt"
 	"math/rand"
-	"techtrainingcamp-group3/db/dbmodels"
-	"techtrainingcamp-group3/db/sql"
-	"techtrainingcamp-group3/logger"
+	"techtrainingcamp-group3/pkg/db/dbmodels"
+	"techtrainingcamp-group3/pkg/db/sql"
+	"techtrainingcamp-group3/pkg/logger"
 	"testing"
 	"time"
 )
@@ -221,5 +221,5 @@ func showEnvelopeAmount() {
 	fmt.Printf("There are %v envelope in the table %v\n", len(envelopes), dbmodels.Envelope{}.TableName())
 }
 func TestMysql(t *testing.T) {
-	showEnvelopeAmount()
+	showEnvelope()
 }
