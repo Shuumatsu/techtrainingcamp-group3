@@ -92,30 +92,30 @@ func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 // Return an envelope with random value
 func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 	script := redis.NewScript(`
-		local TotalAmount = redis.call('GET', 'TotalAmount')
-		local EnvelopeAmount = redis.call('INCR','EnvelopeAmount')
+		local TotalAmount = tonumber(redis.call('GET', 'TotalAmount'))
+		local EnvelopeAmount = tonumber(redis.call('GET','EnvelopeAmount'))
 		
-		if (EnvelopeAmount > TotalAmount)
+		if (EnvelopeAmount >= TotalAmount)
 		then
 			return 0
 		end
-		local LeftMoney = redis.call('GET', 'TotalMoney') - redis.call('GET', 'UsedMoney')
+		local LeftMoney = tonumber(redis.call('GET', 'TotalMoney')) - tonumber(redis.call('GET', 'UsedMoney'))
 		
 		if (LeftMoney <= 0)
 		then
 			return 0
 		end
 		
-		local MinMoney = redis.call('GET', 'MinMoney')
+		local MinMoney = tonumber(redis.call('GET', 'MinMoney'))
 		
 		if (MinMoney > LeftMoney)
 		then
 			return 0
 		end
 		
-		local MaxMoney = math.min(redis.call('GET', 'MaxMoney'), LeftMoney)
+		local MaxMoney = math.min(tonumber(redis.call('GET', 'MaxMoney')), LeftMoney)
 		
-		math.randomseed(os.time())
+		math.randomseed(ARGV[1])
 		local Money =  math.random(MinMoney, MaxMoney)
 		
 		redis.call('INCRBY', 'UsedMoney', Money)
@@ -124,8 +124,10 @@ func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 		return Money
 	`)
 
-	value, _ := script.Run(rds.DB, []string{}).Uint64()
-
+	value, err := script.Run(rds.DB, []string{}, time.Now().Unix()).Uint64()
+	if err != nil {
+		logger.Sugar.Debugw("lua script error", "err msg", err)
+	}
 	return dbmodels.Envelope{
 		EnvelopeId: dbmodels.EID(snowflake.ID()),
 		Uid:        uid,

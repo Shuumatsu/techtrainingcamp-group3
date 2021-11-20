@@ -66,7 +66,16 @@ func SnatchHandler(c *gin.Context) {
 			})
 			return
 		}
+
 		envelope, _ := redisAPI.GetRandEnvelope(dbmodels.UID(req.Uid))
+		if envelope.Value == 0 {
+			c.JSON(200, gin.H{
+				"code": models.NoEnvelopes,
+				"msg":  models.NoEnvelopes.Message(),
+			})
+			return
+		}
+
 		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), envelope)
 		if err != nil {
 			c.JSON(200, gin.H{

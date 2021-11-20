@@ -31,6 +31,15 @@ func init() {
 			"error msg", err.Error())
 	}
 	DB = rd
+	//TODO: Handle the case of failure setting
+	DB.Set("TotalMoney", config.TotalMoney, 0)
+	DB.Set("MaxMoney", config.MaxMoney, 0)
+	DB.Set("MinMoney", config.MinMoney, 0)
+	DB.Set("SnatchProb", config.SnatchProb, 0)
+	DB.Set("MaxSnatchAmount", config.MaxSnatchAmount, 0)
+	DB.Set("TotalAmount", config.TotalAmount, 0)
+	DB.Set("EnvelopeAmount", 0, 0)
+	DB.Set("UsedMoney", 0, 0)
 	snowflake.SetStartTime(time.Date(2021, 11, 1, 0, 0, 0, 0, time.UTC))
 	logger.Sugar.Debugw("redis init", "redis userdb config", DB)
 }

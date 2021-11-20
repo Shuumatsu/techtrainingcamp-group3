@@ -11,6 +11,7 @@ const (
 	DataBaseError
 	SnatchLimit
 	SnatchFailure
+	NoEnvelopes
 	NotDefined
 )
 
@@ -32,6 +33,8 @@ func (e ErrorCode) Message() string {
 		return "snatch limit"
 	case SnatchFailure:
 		return "snatch failure"
+	case NoEnvelopes:
+		return "no envelopes"
 	default:
 		return "not defined"
 	}

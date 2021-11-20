@@ -12,8 +12,6 @@ const (
 	MinMoney        = 100
 	UserAmount      = 6e3
 	SnatchProb      = 0.6
-	PoolCapacity    = 128
-	PoolWorkerNUM   = 10
 	MaxSnatchAmount = 5
 	TotalAmount     = 3
 )
