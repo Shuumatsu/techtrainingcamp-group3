@@ -13,7 +13,7 @@ import (
 )
 
 func WalletListHandler(c *gin.Context) {
-	//Check the request parameter
+	// Check the request parameter
 	var req models.WalletListReq
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -80,20 +80,22 @@ func WalletListHandler(c *gin.Context) {
 		return
 	}
 
-	//Try to find envelopes using redis
-	envelopes := make([]dbmodels.Envelope, 0)
+	// Try to find envelopes using redis
+	envelopes := make([]dbmodels.Envelope, len(envelopesID))
+	redisNotFoundIdx := make([]int, 0)
 	for i := 0; i < len(envelopesID); i++ {
 		envelope, err := redisAPI.FindEnvelopeByEID(envelopesID[i])
 		if err != nil {
-			break
+			redisNotFoundIdx = append(redisNotFoundIdx, i)
+			continue
 		}
-		envelopes = append(envelopes, *envelope)
+		envelopes[i] = *envelope
 	}
 
-	//If failed to find in redis, find envelopes in sql
-	if len(envelopes) != len(envelopesID) {
-		logger.Sugar.Debugw("redis not found", "envelopes", envelopesID)
-		envelopes, err = sqlAPI.FindEnvelopesByUID(dbmodels.UID(req.Uid))
+	// If some envelopes failed to find in redis, find them in sql
+	for i := 0; i < len(redisNotFoundIdx); i++ {
+		idx := redisNotFoundIdx[i]
+		envelope, err := sqlAPI.FindEnvelopeByUidEid(envelopesID[idx], dbmodels.UID(req.Uid))
 		if err != nil {
 			c.JSON(200, models.WalletListResp{
 				Code: models.DataBaseError,
@@ -104,11 +106,16 @@ func WalletListHandler(c *gin.Context) {
 				"not found in mysql", err)
 			return
 		}
-		//If sql successes, flush sql results to redis
-		for _, envelope := range envelopes{
-			if err = redisAPI.SetEnvelopeByEID(&envelope,300*time.Second);err != nil{
-				logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
-			}
+		envelopes[idx] = *envelope
+	}
+	//  flush results to redis
+	for _, envelope := range envelopes {
+		if envelope.EnvelopeId == 0 {
+			continue
+		}
+		if err = redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second); err != nil {
+			logger.Sugar.Errorw("Redis set envelop opened error",
+				"envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
 		}
 	}
 

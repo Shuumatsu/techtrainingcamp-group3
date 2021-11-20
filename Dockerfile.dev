@@ -8,8 +8,8 @@ ADD . /workspace
 WORKDIR /workspace
 
 RUN go env -w GO111MODULE="on" && go env -w GOPROXY="https://goproxy.cn,direct"
-RUN GO111MODULE=off go get github.com/twitchtv/retool
-RUN GO111MODULE=off go get golang.org/x/tools/cmd/goimports
+RUN go get github.com/twitchtv/retool
+RUN go get golang.org/x/tools/cmd/goimports
 RUN go mod vendor && go mod tidy
 RUN make all
 

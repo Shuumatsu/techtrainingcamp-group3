@@ -62,7 +62,7 @@ func (e Envelope) ToResqModel() models.Envelope {
 	var envelope models.Envelope
 	envelope.EnvelopeId = uint64(e.EnvelopeId)
 	envelope.Opened = e.Opened
-	if e.Opened != false {
+	if e.Opened {
 		envelope.Value = e.Value
 	}
 	envelope.SnatchTime = e.SnatchTime
