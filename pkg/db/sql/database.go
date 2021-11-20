@@ -91,8 +91,8 @@ func RegisterDefaultUser(n uint64) error {
 		if err != nil {
 			logger.Sugar.Errorw("register user", "error", err)
 		}
-		//add users to bloom filter
-		for _,user := range users {
+		// add users to bloom filter
+		for _, user := range users {
 			bloomfilter.RedisAddUser(user.Uid)
 		}
 	}

@@ -221,5 +221,5 @@ func showEnvelopeAmount() {
 	fmt.Printf("There are %v envelope in the table %v\n", len(envelopes), dbmodels.Envelope{}.TableName())
 }
 func TestMysql(t *testing.T) {
-	showEnvelopeAmount()
+	showEnvelope()
 }
