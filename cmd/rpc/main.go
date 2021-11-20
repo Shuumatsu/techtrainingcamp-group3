@@ -64,18 +64,22 @@ func (s *userServer) OpenEnvelope(ctx context.Context, req *pb.OpenEnvelopeReq) 
 
 func (s *userServer) ListEnvelopes(ctx context.Context, req *pb.ListEnvelopesReq) (*pb.ListEnvelopesReply, error) {
 	user, err := rdb.GetUser(ctx, req.UserId)
-	if err == redis.Nil {
-		user, err = database.GetUser(req.UserId)
-	}
-	if err != nil {
-		logger.Sugar.Errorf("ListEnvelopes", "req", req, "error", err)
+	if err != nil && err != redis.Nil {
+		logger.Sugar.Errorf("[ListEnvelopes] rdb.GetUser", "req.UserId", req.UserId, "error", err)
 		return &pb.ListEnvelopesReply{ErrorType: pb.ErrorType_Internal}, nil
 	}
-	_ = rdb.SetUser(ctx, user, time.Minute)
+	if err == redis.Nil {
+		user, err = database.GetUser(req.UserId)
+		if err != nil {
+			logger.Sugar.Errorf("[ListEnvelopes] database.GetUser", "req.UserId", req.UserId, "error", err)
+			return &pb.ListEnvelopesReply{ErrorType: pb.ErrorType_Internal}, nil
+		}
+		_ = rdb.SetUser(ctx, user, time.Minute)
+	}
 
 	list, err := database.ParseEnvelopeList(user.EnvelopeList)
 	if err != nil {
-		logger.Sugar.Errorf("ListEnvelopes", "req", req, "error", err)
+		logger.Sugar.Errorf("[ListEnvelopes] database.ParseEnvelopeList", "user.EnvelopeList", user.EnvelopeList, "error", err)
 		return &pb.ListEnvelopesReply{ErrorType: pb.ErrorType_Internal}, nil
 	}
 
@@ -86,7 +90,7 @@ func (s *userServer) ListEnvelopes(ctx context.Context, req *pb.ListEnvelopesReq
 			envelope, err = database.GetEnvelope(id)
 		}
 		if err != nil {
-			logger.Sugar.Errorf("ListEnvelopes", "req", req, "error", err)
+			logger.Sugar.Errorf("[ListEnvelopes]", "req", req, "error", err)
 			return &pb.ListEnvelopesReply{ErrorType: pb.ErrorType_Internal}, nil
 		}
 		_ = rdb.SetEnvelope(ctx, envelope, time.Minute)

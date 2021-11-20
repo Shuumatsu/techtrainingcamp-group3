@@ -2,6 +2,7 @@ package rdb
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/logger"
@@ -14,23 +15,19 @@ var Client *redis.Client
 func init() {
 	poolSize, err := strconv.Atoi(config.Env.RedisPoolSize)
 	if err != nil {
-		logger.Sugar.Fatalw("redis init error",
-			"poolsize must be a number, poolsize:", config.Env.RedisPoolSize)
+		logger.Sugar.Fatalw("[rdb.init]", "RedisPoolSize", config.Env.RedisPoolSize)
 	}
 
 	// init user db
 	option := redis.Options{
-		Addr:     config.Env.RedisHost + ":" + config.Env.RedisPort,
+		Addr:     fmt.Sprintf("%s:%s", config.Env.RedisHost, config.Env.RedisPort),
 		Password: config.Env.RedisPasswd,
 		PoolSize: poolSize,
 	}
 
 	client := redis.NewClient(&option)
 	if result, err := client.Ping(context.TODO()).Result(); err != nil {
-		logger.Sugar.Fatalw("redis init error",
-			"redis config", client,
-			"ping redis result", result,
-			"error msg", err.Error())
+		logger.Sugar.Fatalw("[rdb.init] ping", "client", client, "result", result, "error", err)
 	}
 
 	Client = client
