@@ -25,7 +25,9 @@ if [ -z $(go env GOPATH) ]; then
 fi
 GOPATH=$(go env GOPATH)
 GO_PREFIX_PATH=techtrainingcamp-group3/proto/pkg
-export PATH=$(pwd)/_tools/bin:$GOPATH/bin:$PATH
+export GOROOT=/usr/local/go
+export GOBIN=$GOPATH/bin
+export PATH=$GOPATH:$(pwd)/_tools/bin:$GOBIN:$GOROOT
 
 # echo "install tools..."
 # GO111MODULE=off go get github.com/twitchtv/retool
