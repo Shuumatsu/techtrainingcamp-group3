@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	TotalMoney      = 2e3
+	TotalMoney      = 1e10
 	MaxMoney        = 500
 	MinMoney        = 100
-	UserAmount      = 6e3
+	UserAmount      = 6e7
 	SnatchProb      = 0.6
 	MaxSnatchAmount = 5
-	TotalAmount     = 7
+	TotalAmount     = UserAmount * MaxSnatchAmount
 )
 
 type Environment struct {
