@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/logger"
+	"github.com/godruoyi/go-snowflake"
+	"time"
 )
 
 var DB *redis.Client
@@ -31,5 +33,15 @@ func init() {
 			"error msg", err.Error())
 	}
 	DB = rd
+	//TODO: Handle the case of failure setting
+	DB.Set(Ctx, "TotalMoney", config.TotalMoney, 0)
+	DB.Set(Ctx, "MaxMoney", config.MaxMoney, 0)
+	DB.Set(Ctx, "MinMoney", config.MinMoney, 0)
+	DB.Set(Ctx, "SnatchProb", config.SnatchProb, 0)
+	DB.Set(Ctx, "MaxSnatchAmount", config.MaxSnatchAmount, 0)
+	DB.Set(Ctx, "TotalAmount", config.TotalAmount, 0)
+	DB.Set(Ctx, "EnvelopeAmount", 0, 0)
+	DB.Set(Ctx, "UsedMoney", 0, 0)
+	snowflake.SetStartTime(time.Date(2021, 11, 1, 0, 0, 0, 0, time.UTC))
 	logger.Sugar.Debugw("redis init", "redis userdb config", DB)
 }
