@@ -1,39 +1,38 @@
 package kfk
 
 import (
-	"fmt"
 	"github.com/Shopify/sarama"
-	"gorm.io/gorm"
 	"strconv"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
+	"techtrainingcamp-group3/pkg/db/rds/redisAPI"
 	"techtrainingcamp-group3/pkg/db/sql"
+	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
+	"time"
 )
 
 type cb func(msg *sarama.ConsumerMessage) error
 
 func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
-	tx := sql.DB.Begin()
-	tmp, _ := strconv.Atoi(string(msg.Key))
-	uid := dbmodels.UID(tmp)
 	envelope := dbmodels.Envelope{}
-	envelope.UnmarshalBinary(msg.Value)
-	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", uid, "envelope", envelope)
-	if err := tx.Model(
-		&envelope).Update("opened", true).Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
+	err := envelope.UnmarshalBinary(msg.Value)
+	if err != nil{
+		logger.Sugar.Errorw("consumeOpenEnvelope message unmarshal error")
 		return err
 	}
-	if err := tx.Table(
-		dbmodels.User{}.TableName()).Where("uid", uid).Update(
-		"amount", gorm.Expr(
-			"amount + ?", envelope.Value)).Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		tx.Rollback()
+
+	//try to update user amount and envelope status in sql
+	err = sqlAPI.UpdateEnvelopeOpen(&envelope)
+	if err != nil{
 		return err
 	}
-	return tx.Commit().Error
+
+	// If data success flush envelope to redis
+	envelope.Opened = true
+	if err := redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second); err != nil {
+		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
+	}
+	return nil
 }
 
 func consumeAddUser(msg *sarama.ConsumerMessage) error {
@@ -54,31 +53,25 @@ func consumeAddEnvelopeToUser(msg *sarama.ConsumerMessage) error {
 	tmp, _ := strconv.Atoi(string(msg.Key))
 	uid := dbmodels.UID(tmp)
 	envelope := dbmodels.Envelope{}
-	envelope.UnmarshalBinary(msg.Value)
+	err := envelope.UnmarshalBinary(msg.Value)
+	if err != nil{
+		logger.Sugar.Errorw("ConsumeAddEnvelopeToUser UnmarshalBinary error","uid",uid)
+		return err
+	}
+
 	logger.Sugar.Debugw("Consumer: AddEnvelopeToUser", "uid", uid, "envelope", envelope)
-	tx := sql.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-	if err := tx.Table(
-		dbmodels.Envelope{}.TableName()).Create(
-		&envelope).Error; err != nil {
-		logger.Sugar.Debugw("AddEnvelopeToUserByUID", "error", err)
-		tx.Rollback()
+	err = sqlAPI.AddEnvelopeToUserByUID(uid,envelope)
+	if err != nil{
+		logger.Sugar.Errorw("AddEnvelopeToUserByUID SQL error","error",err)
 		return err
 	}
-	if err := tx.Model(
-		&dbmodels.User{Uid: uid}).Update(
-		"envelope_list", gorm.Expr(
-			fmt.Sprintf(`CONCAT(envelope_list,",%s")`, envelope.EnvelopeId.String()))).
-		Error; err != nil {
-		logger.Sugar.Debugw("AddEnvelopeToUserByUID", "error", err)
-		tx.Rollback()
-		return err
+
+	//Update envelope's information in redis
+	err = redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second)
+	if err != nil {
+		logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
 	}
-	return tx.Commit().Error
+	return nil
 }
 
 func loopConsumer(consumer sarama.Consumer, topic string, partition int, f cb) {
@@ -94,6 +87,7 @@ func loopConsumer(consumer sarama.Consumer, topic string, partition int, f cb) {
 	for {
 		msg := <-partitionConsumer.Messages()
 		f(msg)
+
 	}
 }
 
