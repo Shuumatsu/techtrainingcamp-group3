@@ -1,7 +1,7 @@
 package redisAPI
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/godruoyi/go-snowflake"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
 	"techtrainingcamp-group3/pkg/db/rds"
@@ -130,7 +130,7 @@ func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 		return Money
 	`)
 	rand.Seed(time.Now().Unix())
-	value, err := script.Run(rds.DB, []string{}, rand.NormFloat64()).Uint64()
+	value, err := script.Run(rds.Ctx, rds.DB, []string{}, rand.NormFloat64()).Uint64()
 	if err != nil {
 		logger.Sugar.Debugw("lua script error", "err msg", err)
 	}
