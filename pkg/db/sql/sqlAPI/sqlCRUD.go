@@ -112,7 +112,7 @@ func AddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error 
 	}
 	kfk.AddEnvelopeToUser(uid, envelope)
 	return nil
-	//return doAddEnvelopeToUserByUID(uid, envelope)
+	// return doAddEnvelopeToUserByUID(uid, envelope)
 }
 func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error {
 	tx := sql.DB.Begin()
