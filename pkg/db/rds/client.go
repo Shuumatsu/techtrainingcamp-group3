@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/logger"
-
 	"github.com/go-redis/redis"
+	"github.com/godruoyi/go-snowflake"
+	"time"
 )
 
 var DB *redis.Client
@@ -30,5 +31,6 @@ func init() {
 			"error msg", err.Error())
 	}
 	DB = rd
+	snowflake.SetStartTime(time.Date(2021, 11, 1, 0, 0, 0, 0, time.UTC))
 	logger.Sugar.Debugw("redis init", "redis userdb config", DB)
 }

@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	TotalMoney      = 1e10
+	TotalMoney      = 1e6
 	MaxMoney        = 500
 	MinMoney        = 100
-	UserAmount      = 6e7
+	UserAmount      = 6e3
 	SnatchProb      = 0.6
 	PoolCapacity    = 128
 	PoolWorkerNUM   = 10
 	MaxSnatchAmount = 5
-	TotalAmount     = UserAmount * MaxSnatchAmount
+	TotalAmount     = 3
 )
 
 type Environment struct {

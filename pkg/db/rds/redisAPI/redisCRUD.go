@@ -1,12 +1,12 @@
 package redisAPI
 
 import (
+	"github.com/go-redis/redis"
+	"github.com/godruoyi/go-snowflake"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
 	"techtrainingcamp-group3/pkg/db/rds"
 	"techtrainingcamp-group3/pkg/logger"
 	"time"
-
-	"github.com/go-redis/redis"
 )
 
 // SetUserByUID
@@ -86,4 +86,50 @@ func FindEnvelopeByEIDUID(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelop
 		return nil, dbmodels.Error.ErrorEnvelopeOwner
 	}
 	return &envelope, nil
+}
+
+// GetRandEnvelope
+// Return an envelope with random value
+func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
+	script := redis.NewScript(`
+		local TotalAmount = redis.call('GET', 'TotalAmount')
+		local EnvelopeAmount = redis.call('INCR','EnvelopeAmount')
+		
+		if (EnvelopeAmount > TotalAmount)
+		then
+			return 0
+		end
+		local LeftMoney = redis.call('GET', 'TotalMoney') - redis.call('GET', 'UsedMoney')
+		
+		if (LeftMoney <= 0)
+		then
+			return 0
+		end
+		
+		local MinMoney = redis.call('GET', 'MinMoney')
+		
+		if (MinMoney > LeftMoney)
+		then
+			return 0
+		end
+		
+		local MaxMoney = math.min(redis.call('GET', 'MaxMoney'), LeftMoney)
+		
+		math.randomseed(os.time())
+		local Money =  math.random(MinMoney, MaxMoney)
+		
+		redis.call('INCRBY', 'UsedMoney', Money)
+		redis.call('INCR', 'EnvelopeAmount')
+		
+		return Money
+	`)
+
+	value, _ := script.Run(rds.DB, []string{}).Uint64()
+
+	return dbmodels.Envelope{
+		EnvelopeId: dbmodels.EID(snowflake.ID()),
+		Uid:        uid,
+		Value:      value,
+		SnatchTime: time.Now().Unix(),
+	}, nil
 }

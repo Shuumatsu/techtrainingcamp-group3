@@ -10,9 +10,7 @@ import (
 	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
 	"techtrainingcamp-group3/pkg/models"
-	"techtrainingcamp-group3/pkg/tools"
 	"time"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,7 +52,7 @@ func SnatchHandler(c *gin.Context) {
 			})
 			return
 		}
-		envelope := tools.GetRandEnvelope(user.Uid)
+		envelope, _ := redisAPI.GetRandEnvelope(dbmodels.UID(req.Uid))
 		err = sqlAPI.AddEnvelopeToUserByUID(dbmodels.UID(req.Uid), envelope)
 		if err != nil {
 			c.JSON(200, gin.H{
