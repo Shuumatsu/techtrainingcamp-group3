@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"techtrainingcamp-group3/pkg/db/bloomfilter"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
-	"techtrainingcamp-group3/pkg/db/kfk"
 	"techtrainingcamp-group3/pkg/db/sql"
 	"techtrainingcamp-group3/pkg/db/tokenBucket"
 	"techtrainingcamp-group3/pkg/logger"
@@ -110,17 +109,18 @@ func AddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error 
 	if err != nil {
 		return err
 	}
-	kfk.AddEnvelopeToUser(uid, envelope)
-	return nil
-	//return doAddEnvelopeToUserByUID(uid, envelope)
+	return doAddEnvelopeToUserByUID(uid, envelope)
 }
 func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) error {
+	//start transaction
 	tx := sql.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 		}
 	}()
+
+	//Create envelope in envelope table
 	if err := tx.Table(
 		dbmodels.Envelope{}.TableName()).Create(
 		&envelope).Error; err != nil {
@@ -128,6 +128,8 @@ func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) erro
 		tx.Rollback()
 		return err
 	}
+
+	//add envelope to user's envelope list
 	if err := tx.Model(
 		&dbmodels.User{Uid: uid}).Update(
 		"envelope_list", gorm.Expr(
@@ -138,73 +140,6 @@ func doAddEnvelopeToUserByUID(uid dbmodels.UID, envelope dbmodels.Envelope) erro
 		return err
 	}
 	return tx.Commit().Error
-}
-
-// FindEnvelopeByEID
-//	param:
-//		eid > 0
-//	return:
-// 		if the envelope is exist, return the envelope
-//		else return error(Error.NotFound or other databaseError)
-func FindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
-	if eid == 0 {
-		return nil, Error.ErrorParam
-	}
-	err := tokenBucket.Limiter.Wait(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-	return doFindEnvelopeByEID(eid)
-}
-func doFindEnvelopeByEID(eid dbmodels.EID) (*dbmodels.Envelope, error) {
-	envelope := dbmodels.Envelope{EnvelopeId: eid}
-	if err := sql.DB.Table(
-		dbmodels.Envelope{}.TableName()).Take(
-		&envelope).Error; err != nil {
-		logger.Sugar.Debugw("FindEnvelopeByEID", "error", err)
-		return nil, err
-	}
-	return &envelope, nil
-}
-
-// OpenEnvelope
-//	param:
-//		eid > 0
-//		uid > 0
-//	return:
-//		if eid == 0 or uid == 0: return Error.ErrorParam
-//		else if the envelope is already open: return Error.EnvelopeAlreadyOpen
-//		else if the envelope's owner is not the param-uid: return Error.ErrorEnvelopeOwner
-//		else if sql error: return other database error
-//		else return the envelope
-// update the envelope open and add the envelope's value to user amount
-func OpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
-	if eid == 0 || uid == 0 {
-		return nil, Error.ErrorParam
-	}
-	err := tokenBucket.Limiter.Wait(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-	return doOpenEnvelope(eid, uid)
-}
-func doOpenEnvelope(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envelope, error) {
-	envelope, err := FindEnvelopeByEID(eid)
-	if err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		return nil, err
-	}
-	if envelope.Opened == true {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		return nil, dbmodels.Error.EnvelopeAlreadyOpen
-	}
-	if envelope.Uid != uid {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
-		return nil, dbmodels.Error.ErrorEnvelopeOwner
-	}
-	kfk.OpenEnvelope(uid, *envelope)
-	envelope.Opened = true
-	return envelope, nil
 }
 
 // FindEnvelopeByUidEid
@@ -247,43 +182,63 @@ func doFindEnvelopeByUidEid(eid dbmodels.EID, uid dbmodels.UID) (*dbmodels.Envel
 //		if success : nil
 //      if fail : database error
 // update the envelope opened from false to true and add the envelope's value to user amount
-func UpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
+func UpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 	if p.EnvelopeId == 0 || p.Uid == 0 {
-		return nil, Error.ErrorParam
+		return Error.ErrorParam
 	}
 	err := tokenBucket.Limiter.Wait(context.TODO())
 	if err != nil {
-		return nil, err
+		return err
 	}
 	return doUpdateEnvelopeOpen(p)
 }
-
-func doUpdateEnvelopeOpen(p *dbmodels.Envelope) (*dbmodels.User, error) {
+func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 	var user dbmodels.User
 	var envelope dbmodels.Envelope
 	user.Uid = p.Uid
 	envelope.EnvelopeId = p.EnvelopeId
+	//start transaction
+	tx := sql.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	// find envelope status
 	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope).Error; err != nil {
 		logger.Sugar.Errorw("Find Envelope By EID", "error", err)
-		return nil, err
+		return err
 	}
-
 	// check open status for data consistency
 	if envelope.Opened == true {
-		return nil, dbmodels.Error.EnvelopeAlreadyOpen
+		return dbmodels.Error.EnvelopeAlreadyOpen
 	}
 
-	// find user amount to get amount
-	if err := sql.DB.Table(dbmodels.User{}.TableName()).Take(&user).Error; err != nil {
-		logger.Sugar.Errorw("FindUserByUID", "error", err)
-		return nil, err
+	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", p.Uid, "envelope", envelope)
+
+	//Update envelope to be opened
+	if err := tx.Model(
+		&envelope).Update("opened", true).Error; err != nil {
+		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+		tx.Rollback()
+		return err
 	}
 
-	kfk.OpenEnvelope(p.Uid, *p)
+	//Update user amount
+	if err := tx.Table(
+		dbmodels.User{}.TableName()).Where("uid", p.Uid).Update(
+		"amount", gorm.Expr(
+			"amount + ?", envelope.Value)).Error; err != nil {
+		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+		tx.Rollback()
+		return err
+	}
+	err := tx.Commit().Error
+	if err != nil{
+		logger.Sugar.Errorw("UpdateEnvelopeOpen sql error","eid",p.EnvelopeId)
+		return err
+	}
 
-	user.Amount += p.Value
-
-	return &user, nil
+	return nil
 }

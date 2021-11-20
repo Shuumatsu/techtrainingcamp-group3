@@ -7,6 +7,7 @@ import (
 	"techtrainingcamp-group3/pkg/db/rds"
 	"techtrainingcamp-group3/pkg/logger"
 	"time"
+	"math/rand"
 )
 
 // SetUserByUID
@@ -99,6 +100,7 @@ func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 		then
 			return 0
 		end
+		
 		local LeftMoney = tonumber(redis.call('GET', 'TotalMoney')) - tonumber(redis.call('GET', 'UsedMoney'))
 		
 		if (LeftMoney <= 0)
@@ -115,16 +117,20 @@ func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 		
 		local MaxMoney = math.min(tonumber(redis.call('GET', 'MaxMoney')), LeftMoney)
 		
-		math.randomseed(ARGV[1])
-		local Money =  math.random(MinMoney, MaxMoney)
+		local mean = LeftMoney / (TotalAmount - EnvelopeAmount)
+		local std = (MaxMoney - MinMoney) / 4
+		
+		local Money = math.floor(tonumber(ARGV[1]) * mean + std)
+		Money = math.min(Money, MaxMoney)
+		Money = math.max(Money, MinMoney)
 		
 		redis.call('INCRBY', 'UsedMoney', Money)
 		redis.call('INCR', 'EnvelopeAmount')
 		
 		return Money
 	`)
-
-	value, err := script.Run(rds.DB, []string{}, time.Now().Unix()).Uint64()
+	rand.Seed(time.Now().Unix())
+	value, err := script.Run(rds.DB, []string{}, rand.NormFloat64()).Uint64()
 	if err != nil {
 		logger.Sugar.Debugw("lua script error", "err msg", err)
 	}
@@ -134,4 +140,9 @@ func GetRandEnvelope(uid dbmodels.UID) (dbmodels.Envelope, error) {
 		Value:      value,
 		SnatchTime: time.Now().Unix(),
 	}, nil
+}
+// DeleteEnvelopeByEID
+func DelEnvelopeByEID(eid dbmodels.EID) error {
+	err := rds.DB.Del(eid.Key()).Err()
+	return err
 }

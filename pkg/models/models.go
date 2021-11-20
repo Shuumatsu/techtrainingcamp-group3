@@ -12,6 +12,7 @@ const (
 	SnatchLimit
 	SnatchFailure
 	NoEnvelopes
+	KafkaError
 	NotDefined
 )
 
@@ -35,6 +36,8 @@ func (e ErrorCode) Message() string {
 		return "snatch failure"
 	case NoEnvelopes:
 		return "no envelopes"
+	case KafkaError:
+		return "Kafka error"
 	default:
 		return "not defined"
 	}

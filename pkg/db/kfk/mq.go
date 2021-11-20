@@ -11,7 +11,10 @@ func init() {
 	cfg := sarama.NewConfig()
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
 	cfg.Producer.Partitioner = sarama.NewRandomPartitioner
+
 	cfg.Producer.Return.Successes = true
+	cfg.Producer.Return.Errors = true
+	cfg.Producer.Retry.Max = 3
 
 	msg := &sarama.ProducerMessage{}
 	msg.Topic = "test"
