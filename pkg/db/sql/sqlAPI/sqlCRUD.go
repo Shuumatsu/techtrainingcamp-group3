@@ -3,13 +3,13 @@ package sqlAPI
 import (
 	"context"
 	"fmt"
+	"gorm.io/gorm"
+	"techtrainingcamp-group3/pkg/db/bloomfilter"
 	"techtrainingcamp-group3/pkg/db/dbmodels"
 	"techtrainingcamp-group3/pkg/db/kfk"
 	"techtrainingcamp-group3/pkg/db/sql"
 	"techtrainingcamp-group3/pkg/db/tokenBucket"
 	"techtrainingcamp-group3/pkg/logger"
-
-	"gorm.io/gorm"
 )
 
 // FindOrCreateUserByUID
@@ -37,6 +37,7 @@ func doFindOrCreateUserByUID(defaultUser dbmodels.User) (*dbmodels.User, error) 
 		logger.Sugar.Debugw("FindOrCreateUserByUID", "error", err)
 		return nil, err
 	}
+	bloomfilter.RedisAddUser(defaultUser.Uid)
 	return &defaultUser, nil
 }
 

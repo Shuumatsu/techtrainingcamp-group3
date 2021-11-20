@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/Shopify/sarama v1.30.0
-	github.com/bits-and-blooms/bloom/v3 v3.1.0
 	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -21,7 +20,6 @@ require (
 )
 
 require (
-	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
