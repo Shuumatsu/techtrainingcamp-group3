@@ -193,10 +193,6 @@ func UpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 	return doUpdateEnvelopeOpen(p)
 }
 func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
-	var user dbmodels.User
-	var envelope dbmodels.Envelope
-	user.Uid = p.Uid
-	envelope.EnvelopeId = p.EnvelopeId
 	//start transaction
 	tx := sql.DB.Begin()
 	defer func() {
@@ -205,11 +201,11 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 		}
 	}()
 
-	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", p.Uid, "envelope", envelope)
+	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", p.Uid, "envelope", p.EnvelopeId)
 	//Update envelope to be opened
 	if err := tx.Table(
-		dbmodels.Envelope{}.TableName()).Where("envelope_id",envelope.EnvelopeId).Where("opened",false).Update("opened", true).Error; err != nil {
-		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
+		dbmodels.Envelope{}.TableName()).Where("envelope_id",p.EnvelopeId).Where("opened",false).Update("opened", true).Error; err != nil {
+		logger.Sugar.Errorw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
 		return err
 	}
@@ -218,11 +214,13 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 	if err := tx.Table(
 		dbmodels.User{}.TableName()).Where("uid", p.Uid).Update(
 		"amount", gorm.Expr(
-			"amount + ?", envelope.Value)).Error; err != nil {
+			"amount + ?", p.Value)).Error; err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
 		return err
 	}
+
+	logger.Sugar.Debugw("Open Success","eid",p.EnvelopeId,"value",p.Value)
 
 	err := tx.Commit().Error
 	if err != nil{

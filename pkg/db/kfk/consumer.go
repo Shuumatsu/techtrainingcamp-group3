@@ -24,6 +24,7 @@ func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
 	//try to update user amount and envelope status in sql
 	err = sqlAPI.UpdateEnvelopeOpen(&envelope)
 	if err != nil{
+		logger.Sugar.Errorw("sql updateEnvelopeOpen error","error",err)
 		return err
 	}
 
@@ -32,7 +33,10 @@ func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
 	if err := redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second); err != nil {
 		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
 	}
-	redisAPI.DelUserByUid(envelope.Uid)
+
+	if err := redisAPI.DelUserByUid(envelope.Uid); err != nil {
+		logger.Sugar.Errorw("Redis delete user error","error",err)
+	}
 	return nil
 }
 
@@ -74,6 +78,7 @@ func consumeAddEnvelopeToUser(msg *sarama.ConsumerMessage) error {
 	}
 	//Delete Uid from Snatch Processing
 	redisAPI.DelUidProcessing(uid)
+	redisAPI.DelUserByUid(envelope.Uid)
 	return nil
 }
 
