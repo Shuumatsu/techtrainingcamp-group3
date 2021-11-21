@@ -207,11 +207,13 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 
 	// find envelope status
 	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope).Error; err != nil {
+		tx.Rollback()
 		logger.Sugar.Errorw("Find Envelope By EID", "error", err)
 		return err
 	}
 	// check open status for data consistency
 	if envelope.Opened == true {
+		tx.Rollback()
 		return dbmodels.Error.EnvelopeAlreadyOpen
 	}
 
