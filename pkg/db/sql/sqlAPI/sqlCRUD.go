@@ -203,11 +203,11 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 
 	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", p.Uid, "envelope", p.EnvelopeId)
 	//Update envelope to be opened
-	if err := tx.Table(
-		dbmodels.Envelope{}.TableName()).Where("envelope_id",p.EnvelopeId).Where("opened",false).Update("opened", true).Error; err != nil {
-		logger.Sugar.Errorw("OpenEnvelopeByEID", "error", err)
+	if RowsAffected := tx.Table(
+		dbmodels.Envelope{}.TableName()).Where("envelope_id",p.EnvelopeId).Where("opened",false).Update("opened", true).RowsAffected; RowsAffected != 1 {
+		logger.Sugar.Errorw("update envelope open error", "eid", p.EnvelopeId)
 		tx.Rollback()
-		return err
+		return nil
 	}
 
 	//Update user amount
