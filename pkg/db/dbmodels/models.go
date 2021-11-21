@@ -15,6 +15,10 @@ func (u UID) String() string {
 	return int2str(uint64(u))
 }
 
+func (u UID) BKey() string {
+	return "B:" + u.String()
+}
+
 type EID uint64
 
 func (e EID) Key() string {
