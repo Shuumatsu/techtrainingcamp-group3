@@ -11,6 +11,21 @@ import (
 	"time"
 )
 
+type ConsumerGroupHandler struct{}
+
+func (ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (h ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for msg := range claim.Messages() {
+		chooser(msg.Topic)(msg)
+		sess.MarkMessage(msg, "")
+	}
+	return nil
+}
+
+
+
+
 type cb func(msg *sarama.ConsumerMessage) error
 
 func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
@@ -99,7 +114,7 @@ func loopConsumer(consumer sarama.Consumer, topic string, partition int, f cb) {
 	}
 }
 
-func handler(topic string) func(msg *sarama.ConsumerMessage) error {
+func chooser(topic string) func(msg *sarama.ConsumerMessage) error {
 	switch topic {
 	case "OpenEnvelope":
 		return consumeOpenEnvelope
