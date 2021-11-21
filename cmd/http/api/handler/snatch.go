@@ -12,7 +12,6 @@ import (
 	"techtrainingcamp-group3/pkg/db/sql/sqlAPI"
 	"techtrainingcamp-group3/pkg/logger"
 	"techtrainingcamp-group3/pkg/models"
-	"techtrainingcamp-group3/pkg/tools"
 )
 
 func SnatchHandler(c *gin.Context) {
@@ -67,9 +66,15 @@ func SnatchHandler(c *gin.Context) {
 			})
 			return
 		}
-		//Generate envelope
-		envelope := tools.GetRandEnvelope(user.Uid)
 
+		envelope, _ := redisAPI.GetRandEnvelope(dbmodels.UID(req.Uid))
+		if envelope.Value == 0 {
+			c.JSON(200, gin.H{
+				"code": models.NoEnvelopes,
+				"msg":  models.NoEnvelopes.Message(),
+			})
+			return
+		}
 		// put create the envelope in envelope table and append it to the user's envelope_list into kafka
 		err = kfk.AddEnvelopeToUser(dbmodels.UID(req.Uid), envelope)
 		if err != nil {

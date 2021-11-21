@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # This script generates Go representations of Protobuf protocols. It will generate Go code in the pkg subdirectory
 # for every protocol in the proto subdirectory. It uses protoc, the protobuf compiler, which must be installed.
 
