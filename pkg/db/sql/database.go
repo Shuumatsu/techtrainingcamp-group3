@@ -101,7 +101,7 @@ func RegisterDefaultUser(n uint64) error {
 	var i uint64 = 1
 	if n > step {
 		var wg sync.WaitGroup
-		cnt := 16
+		cnt := 32
 		if runtime.NumCPU() > cnt {
 			cnt = runtime.NumCPU()
 		}
