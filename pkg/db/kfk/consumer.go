@@ -71,6 +71,8 @@ func consumeAddEnvelopeToUser(msg *sarama.ConsumerMessage) error {
 	if err != nil {
 		logger.Sugar.Debugw("snatch", "redis set error", err, "envelope", envelope)
 	}
+	//Delete Uid from Snatch Processing
+	redisAPI.DelUidProcessing(uid)
 	return nil
 }
 

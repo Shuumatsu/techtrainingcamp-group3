@@ -10,9 +10,11 @@ const (
 	ErrorEnvelopeOwner
 	DataBaseError
 	SnatchLimit
+	SnatchFast
 	SnatchFailure
 	NoEnvelopes
 	KafkaError
+	RedisError
 	NotDefined
 )
 
@@ -32,12 +34,16 @@ func (e ErrorCode) Message() string {
 		return "the database error"
 	case SnatchLimit:
 		return "snatch limit"
+	case SnatchFast:
+		return "snatch too fast"
 	case SnatchFailure:
 		return "snatch failure"
 	case NoEnvelopes:
 		return "no envelopes"
 	case KafkaError:
 		return "Kafka error"
+	case RedisError:
+		return "redis error"
 	default:
 		return "not defined"
 	}
