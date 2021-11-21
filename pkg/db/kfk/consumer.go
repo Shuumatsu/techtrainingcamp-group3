@@ -78,7 +78,7 @@ func consumeAddEnvelopeToUser(msg *sarama.ConsumerMessage) error {
 	}
 	//Delete Uid from Snatch Processing
 	redisAPI.DelUidProcessing(uid)
-	redisAPI.DelUserByUid(envelope.Uid)
+	///redisAPI.DelUserByUid(envelope.Uid)
 	return nil
 }
 
