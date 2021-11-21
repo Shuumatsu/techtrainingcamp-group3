@@ -38,49 +38,49 @@ func init() {
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "TotalMoney set error", config.TotalMoney)
 	}
-	logger.Sugar.Infow("redis init", "TotalMoney set success", config.TotalMoney)
+	logger.Sugar.Infow("redis init TotalMoney set success", "config", config.TotalMoney, "redis", DB.Get(Ctx, "TotalMoney").String())
 
 	err = DB.SetNX(Ctx, "MaxMoney", config.MaxMoney, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "MaxMoney set error", config.MaxMoney)
 	}
-	logger.Sugar.Infow("redis init", "MaxMoney set success", config.MaxMoney)
+	logger.Sugar.Infow("redis init MaxMoney set success", "config", config.MaxMoney, "redis", DB.Get(Ctx, "MaxMoney").String())
 
 	err = DB.SetNX(Ctx, "MinMoney", config.MinMoney, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "MinMoney set error", config.MinMoney)
 	}
-	logger.Sugar.Infow("redis init", "MinMoney set success", config.MinMoney)
+	logger.Sugar.Infow("redis init MinMoney set success", "config", config.MinMoney, "redis", DB.Get(Ctx, "MinMoney").String())
 
 	err = DB.SetNX(Ctx, "SnatchProb", config.SnatchProb, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "SnatchProb set error", config.SnatchProb)
 	}
-	logger.Sugar.Infow("redis init", "SnatchProb set success", config.SnatchProb)
+	logger.Sugar.Infow("redis init SnatchProb set success", "config", config.SnatchProb, "redis", DB.Get(Ctx, "SnatchProb").String())
 
 	err = DB.SetNX(Ctx, "MaxSnatchAmount", config.MaxSnatchAmount, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "MaxSnatchAmount set error", config.MaxSnatchAmount)
 	}
-	logger.Sugar.Infow("redis init", "MaxSnatchAmount set success", config.MaxSnatchAmount)
+	logger.Sugar.Infow("redis init MaxSnatchAmount set success", "config", config.MaxSnatchAmount, "redis", DB.Get(Ctx, "MaxSnatchAmount").String())
 
 	err = DB.SetNX(Ctx, "TotalAmount", config.TotalAmount, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "TotalAmount set error", config.TotalAmount)
 	}
-	logger.Sugar.Infow("redis init", "TotalAmount set success", config.TotalAmount)
+	logger.Sugar.Infow("redis init TotalAmount set success", "config", config.TotalAmount, "redis", DB.Get(Ctx, "TotalAmount").String())
 
 	err = DB.SetNX(Ctx, "EnvelopeAmount", 0, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "EnvelopeAmount set error", 0)
 	}
-	logger.Sugar.Infow("redis init", "EnvelopeAmount set success", 0)
+	logger.Sugar.Infow("redis init EnvelopeAmount set success", "config", 0, "redis", DB.Get(Ctx, "EnvelopeAmount").String())
 
 	err = DB.SetNX(Ctx, "UsedMoney", 0, 0).Err()
 	if err != nil {
 		logger.Sugar.Fatalw("redis init", "UsedMoney set error", 0)
 	}
-	logger.Sugar.Infow("redis init", "UsedMoney set success", 0)
+	logger.Sugar.Infow("redis init UsedMoney set success", "config", 0, "redis", DB.Get(Ctx, "UsedMoney").String())
 
 	snowflake.SetStartTime(time.Date(2021, 11, 1, 0, 0, 0, 0, time.UTC))
 	logger.Sugar.Debugw("redis init", "redis userdb config", DB)
