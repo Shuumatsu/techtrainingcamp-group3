@@ -8,6 +8,8 @@ import (
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+
+	_ "techtrainingcamp-group3/pkg/profiler"
 )
 
 func Register() *gin.Engine {

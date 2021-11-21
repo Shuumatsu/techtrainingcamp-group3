@@ -95,12 +95,17 @@ func RegisterDefaultUser(n uint64) error {
 		for _, user := range users {
 			bloomfilter.RedisAddUser(user.Uid)
 		}
+		logger.Sugar.Debug("register do step")
 	}
 
 	var i uint64 = 1
 	if n > step {
 		var wg sync.WaitGroup
-		ch := make(chan struct{}, runtime.NumCPU())
+		cnt := 16
+		if runtime.NumCPU() > cnt {
+			cnt = runtime.NumCPU()
+		}
+		ch := make(chan struct{}, cnt)
 		for j := 0; j < cap(ch); j++ {
 			ch <- struct{}{}
 		}

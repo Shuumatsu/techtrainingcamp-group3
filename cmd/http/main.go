@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"techtrainingcamp-group3/cmd/http/api/router"
 	"techtrainingcamp-group3/config"
 	"techtrainingcamp-group3/pkg/logger"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
