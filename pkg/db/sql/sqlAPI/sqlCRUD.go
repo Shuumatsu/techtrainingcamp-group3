@@ -205,23 +205,10 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 		}
 	}()
 
-	// find envelope status
-	if err := sql.DB.Table(dbmodels.Envelope{}.TableName()).Take(&envelope).Error; err != nil {
-		tx.Rollback()
-		logger.Sugar.Errorw("Find Envelope By EID", "error", err)
-		return err
-	}
-	// check open status for data consistency
-	if envelope.Opened == true {
-		tx.Rollback()
-		return dbmodels.Error.EnvelopeAlreadyOpen
-	}
-
 	logger.Sugar.Debugw("Consumer: OpenEnvelopeByEID", "uid", p.Uid, "envelope", envelope)
-
 	//Update envelope to be opened
-	if err := tx.Model(
-		&envelope).Update("opened", true).Error; err != nil {
+	if err := tx.Table(
+		dbmodels.Envelope{}.TableName()).Where("envelope_id",envelope.EnvelopeId).Where("opened",false).Update("opened", true).Error; err != nil {
 		logger.Sugar.Debugw("OpenEnvelopeByEID", "error", err)
 		tx.Rollback()
 		return err
@@ -236,6 +223,7 @@ func doUpdateEnvelopeOpen(p *dbmodels.Envelope) error {
 		tx.Rollback()
 		return err
 	}
+
 	err := tx.Commit().Error
 	if err != nil{
 		logger.Sugar.Errorw("UpdateEnvelopeOpen sql error","eid",p.EnvelopeId)

@@ -32,6 +32,7 @@ func consumeOpenEnvelope(msg *sarama.ConsumerMessage) error {
 	if err := redisAPI.SetEnvelopeByEID(&envelope, 300*time.Second); err != nil {
 		logger.Sugar.Errorw("Redis set envelop opened error", "envelope_id", envelope.EnvelopeId, "uid", envelope.Uid)
 	}
+	redisAPI.DelUserByUid(envelope.Uid)
 	return nil
 }
 

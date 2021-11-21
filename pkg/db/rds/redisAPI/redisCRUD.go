@@ -147,11 +147,15 @@ func DelEnvelopeByEID(eid dbmodels.EID) error {
 	return err
 }
 
+func DelUserByUid(uid dbmodels.UID) error {
+	err := rds.DB.Del(rds.Ctx,uid.Key()).Err()
+	return err
+}
+
 func DelUidProcessing(uid dbmodels.UID) error {
 	err := rds.DB.Del(rds.Ctx,uid.BKey()).Err()
 	return err
 }
-
 
 func SetNXUidInProcessing(uid dbmodels.UID,expiration time.Duration) bool{
 	res,err := rds.DB.SetNX(rds.Ctx,uid.BKey(),"",expiration).Result()
